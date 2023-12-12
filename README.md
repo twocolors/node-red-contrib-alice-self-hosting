@@ -35,6 +35,6 @@ Node-RED nodes to Yandex Alice devices in Self-Hosting
 
 <img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/oauth.png">
 
-Создаем диалог на [Яндекс](https://dialogs.yandex.ru) заполняем **ClientID** и **Client secret** как на скрине
+Создаем диалог (**Приватный**) на [Яндекс](https://dialogs.yandex.ru) заполняем **ClientID** и **Client secret** как на скрине
 
 <img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/dialogs.png">
