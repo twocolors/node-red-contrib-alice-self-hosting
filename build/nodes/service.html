@@ -1,0 +1,59 @@
+<script type="text/javascript">
+  RED.nodes.registerType('alice-sh-service', {
+    category: 'config',
+    defaults: {
+      name: {},
+      skill_id: {value: '', required: true},
+      path: {value: '', required: true}
+    },
+    paletteLabel: 'service',
+    label: function () {
+      return this.name || 'Alice Service';
+    },
+    oneditprepare: function () {
+      let node = this;
+
+      if (node.path) {
+        $('#webhook').text(window.location.origin + '/' + node.path + '/webhook');
+      } else {
+        let $path = (Math.random() + 1).toString(36).substring(2);
+        $('#node-config-input-path').val($path);
+        $('#webhook').text(window.location.origin + '/' + $path + '/webhook');
+      }
+    }
+  });
+</script>
+
+<script type="text/html" data-template-name="alice-sh-service">
+  <div class="form-row">
+    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-config-input-name" placeholder="Name" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-skill_id"><i class="fa fa-key"></i> Skill Id</label>
+    <input type="text" id="node-config-input-skill_id" placeholder="Skill Id" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-path"><i class="fa fa-globe"></i> Path Url</label>
+    <input type="text" id="node-config-input-path" placeholder="Path Url" />
+  </div>
+
+  <div class="form-row">
+    <div class="form-tips">
+      <b>Important:</b> Webhook url is <b id="webhook">unknown</b> , will be work after <b>Deploy</b>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="alice-sh-service">
+  <p>Yandex Dialogs Service for Alice</p>
+  <h3>Configuration</h3>
+  <dl class="message-properties">
+    <dt class="required">Skill Id<span class="property-type">string</span></dt>
+    <dd>Skill Id from Yandex Dialogs</dd>
+    <dt class="required">Path Url<span class="property-type">string</span></dt>
+    <dd>Webhook path url for Yandex Dialogs</dd>
+  </dl>
+</script>
