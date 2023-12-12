@@ -44,6 +44,7 @@ module.exports = (RED) => {
                 yield device.updateStateDevice();
             }
             catch (error) {
+                self.error(error);
                 setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
             }
         });
@@ -52,6 +53,7 @@ module.exports = (RED) => {
                 yield device.updateInfoDevice();
             }
             catch (error) {
+                self.error(error);
                 setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
             }
         });

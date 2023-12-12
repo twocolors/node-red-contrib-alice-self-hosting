@@ -36,7 +36,7 @@ exports.Api = {
         }));
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
-    callback_state: (skill_id, user, device) => __awaiter(void 0, void 0, void 0, function* () {
+    callback_state: (skill_id, oauth_token, user, device) => __awaiter(void 0, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
             const _options = {
                 method: 'POST',
@@ -44,7 +44,7 @@ exports.Api = {
                 url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/state`,
                 headers: {
                     'content-type': 'application/json',
-                    Authorization: `OAuth ${user.token}`
+                    Authorization: `OAuth ${oauth_token}`
                 },
                 data: {
                     ts: Math.floor(Date.now() / 1000),
@@ -64,7 +64,7 @@ exports.Api = {
         }));
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
-    callback_discovery: (skill_id, user) => __awaiter(void 0, void 0, void 0, function* () {
+    callback_discovery: (skill_id, oauth_token, user) => __awaiter(void 0, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
             const _options = {
                 method: 'POST',
@@ -72,7 +72,7 @@ exports.Api = {
                 url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/discovery`,
                 headers: {
                     'content-type': 'application/json',
-                    Authorization: `OAuth ${user.token}`
+                    Authorization: `OAuth ${oauth_token}`
                 },
                 data: {
                     ts: Math.floor(Date.now() / 1000),

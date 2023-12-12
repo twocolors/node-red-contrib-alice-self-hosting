@@ -141,28 +141,32 @@ module.exports = (RED) => {
         };
         // state device
         self.updateStateDevice = function () {
-            var _a;
+            var _a, _b;
             return __awaiter(this, void 0, void 0, function* () {
                 const node_id = service.id;
                 const skill_id = (_a = service.config) === null || _a === void 0 ? void 0 : _a.skill_id;
+                const oauth_token = (_b = service.config) === null || _b === void 0 ? void 0 : _b.oauth_token;
                 const device = self.device;
                 if (!skill_id) {
                     throw new Error(`Parameters 'skill_id' is not set in parents`);
+                }
+                if (!oauth_token) {
+                    throw new Error(`Parameters 'oauth_token' is not set in parents`);
                 }
                 const users = yield storage_1.Storage.getUsersByNodeId(node_id);
                 if ((users === null || users === void 0 ? void 0 : users.length) === 0) {
                     return;
                 }
                 yield users.forEach((u) => __awaiter(this, void 0, void 0, function* () {
-                    var _b, _c;
+                    var _c, _d;
                     if (!access || access === undefined || access.split(',').includes(String(u.login))) {
                         try {
-                            yield api_1.Api.callback_state(skill_id, u, device);
+                            yield api_1.Api.callback_state(skill_id, oauth_token, u, device);
                         }
                         catch (error) {
                             const _error = error;
-                            const status = (_b = _error.response) === null || _b === void 0 ? void 0 : _b.status;
-                            const text = ((_c = _error.response) === null || _c === void 0 ? void 0 : _c.data).replace(/^\n+|\n+$/g, '');
+                            const status = (_c = _error.response) === null || _c === void 0 ? void 0 : _c.status;
+                            const text = ((_d = _error.response) === null || _d === void 0 ? void 0 : _d.data).replace(/^\n+|\n+$/g, '');
                             self.error(`updateStateDevice(${u.login}): ${status} - ${text}`);
                         }
                     }
@@ -171,27 +175,31 @@ module.exports = (RED) => {
         };
         // info device
         self.updateInfoDevice = function () {
-            var _a;
+            var _a, _b;
             return __awaiter(this, void 0, void 0, function* () {
                 const node_id = service.id;
                 const skill_id = (_a = service.config) === null || _a === void 0 ? void 0 : _a.skill_id;
+                const oauth_token = (_b = service.config) === null || _b === void 0 ? void 0 : _b.oauth_token;
                 if (!skill_id) {
                     throw new Error(`Parameters 'skill_id' is not set in parents`);
+                }
+                if (!oauth_token) {
+                    throw new Error(`Parameters 'oauth_token' is not set in parents`);
                 }
                 const users = yield storage_1.Storage.getUsersByNodeId(node_id);
                 if ((users === null || users === void 0 ? void 0 : users.length) === 0) {
                     return;
                 }
                 yield users.forEach((u) => __awaiter(this, void 0, void 0, function* () {
-                    var _b, _c;
+                    var _c, _d;
                     if (!access || access === undefined || access.split(',').includes(String(u.login))) {
                         try {
-                            yield api_1.Api.callback_discovery(skill_id, u);
+                            yield api_1.Api.callback_discovery(skill_id, oauth_token, u);
                         }
                         catch (error) {
                             const _error = error;
-                            const status = (_b = _error.response) === null || _b === void 0 ? void 0 : _b.status;
-                            const text = ((_c = _error.response) === null || _c === void 0 ? void 0 : _c.data).replace(/^\n+|\n+$/g, '');
+                            const status = (_c = _error.response) === null || _c === void 0 ? void 0 : _c.status;
+                            const text = ((_d = _error.response) === null || _d === void 0 ? void 0 : _d.data).replace(/^\n+|\n+$/g, '');
                             self.error(`updateInfoDevice(${u.login}): ${status} - ${text}`);
                         }
                     }

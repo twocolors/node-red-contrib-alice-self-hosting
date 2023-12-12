@@ -142,10 +142,15 @@ module.exports = (RED: NodeAPI) => {
     self.updateStateDevice = async function () {
       const node_id = service.id;
       const skill_id = service.config?.skill_id;
+      const oauth_token = service.config?.oauth_token;
       const device = self.device;
 
       if (!skill_id) {
         throw new Error(`Parameters 'skill_id' is not set in parents`);
+      }
+
+      if (!oauth_token) {
+        throw new Error(`Parameters 'oauth_token' is not set in parents`);
       }
 
       const users = await Storage.getUsersByNodeId(node_id);
@@ -156,7 +161,7 @@ module.exports = (RED: NodeAPI) => {
       await users.forEach(async (u: StorageUserType) => {
         if (!access || access === undefined || access.split(',').includes(String(u.login))) {
           try {
-            await Api.callback_state(skill_id, u, device);
+            await Api.callback_state(skill_id, oauth_token, u, device);
           } catch (error) {
             const _error = error as AxiosError;
             const status = _error.response?.status;
@@ -171,9 +176,14 @@ module.exports = (RED: NodeAPI) => {
     self.updateInfoDevice = async function () {
       const node_id = service.id;
       const skill_id = service.config?.skill_id;
+      const oauth_token = service.config?.oauth_token;
 
       if (!skill_id) {
         throw new Error(`Parameters 'skill_id' is not set in parents`);
+      }
+
+      if (!oauth_token) {
+        throw new Error(`Parameters 'oauth_token' is not set in parents`);
       }
 
       const users = await Storage.getUsersByNodeId(node_id);
@@ -184,7 +194,7 @@ module.exports = (RED: NodeAPI) => {
       await users.forEach(async (u: StorageUserType) => {
         if (!access || access === undefined || access.split(',').includes(String(u.login))) {
           try {
-            await Api.callback_discovery(skill_id, u);
+            await Api.callback_discovery(skill_id, oauth_token, u);
           } catch (error) {
             const _error = error as AxiosError;
             const status = _error.response?.status;

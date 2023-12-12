@@ -23,7 +23,7 @@ export const Api: {[key: string]: any} = {
     });
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
-  callback_state: async (skill_id: string, user: StorageUserType, device: any) => {
+  callback_state: async (skill_id: string, oauth_token: string, user: StorageUserType, device: any) => {
     return new Promise(async (resolve, reject) => {
       const _options = {
         method: 'POST',
@@ -31,7 +31,7 @@ export const Api: {[key: string]: any} = {
         url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/state`,
         headers: {
           'content-type': 'application/json',
-          Authorization: `OAuth ${user.token}`
+          Authorization: `OAuth ${oauth_token}`
         },
         data: {
           ts: Math.floor(Date.now() / 1000),
@@ -51,7 +51,7 @@ export const Api: {[key: string]: any} = {
     });
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
-  callback_discovery: async (skill_id: string, user: StorageUserType) => {
+  callback_discovery: async (skill_id: string, oauth_token: string, user: StorageUserType) => {
     return new Promise(async (resolve, reject) => {
       const _options = {
         method: 'POST',
@@ -59,7 +59,7 @@ export const Api: {[key: string]: any} = {
         url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/discovery`,
         headers: {
           'content-type': 'application/json',
-          Authorization: `OAuth ${user.token}`
+          Authorization: `OAuth ${oauth_token}`
         },
         data: {
           ts: Math.floor(Date.now() / 1000),

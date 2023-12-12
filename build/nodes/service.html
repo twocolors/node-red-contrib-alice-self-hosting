@@ -4,7 +4,8 @@
     defaults: {
       name: {},
       skill_id: {value: '', required: true},
-      path: {value: '', required: true}
+      path: {value: '', required: true},
+      oauth_token: {value: '', required: true},
     },
     paletteLabel: 'service',
     label: function () {
@@ -44,6 +45,11 @@
   </div>
 
   <div class="form-row">
+    <label for="node-config-input-oauth_token"><i class="fa fa-key"></i> OAuth token</label>
+    <input type="text" id="node-config-input-oauth_token" placeholder="OAuth token" />
+  </div>
+
+  <div class="form-row">
     <label for="node-config-input-path"><i class="fa fa-globe"></i> Path Url</label>
     <input type="text" id="node-config-input-path" placeholder="Path Url" style="width: auto;" />
     <button id="set_url" class="ui-button">Set</button>
@@ -62,6 +68,8 @@
   <dl class="message-properties">
     <dt class="required">Skill Id<span class="property-type">string</span></dt>
     <dd>Skill Id from Yandex Dialogs</dd>
+    <dt class="required">OAuth token<span class="property-type">string</span></dt>
+    <dd>OAuth token for Notification service <a href="https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/resources-alerts.html?lang=en#resources-alerts__oauth">more</a></dd>
     <dt class="required">Path Url<span class="property-type">string</span></dt>
     <dd>Webhook path url for Yandex Dialogs</dd>
   </dl>
