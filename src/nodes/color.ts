@@ -63,11 +63,11 @@ module.exports = (RED: NodeAPI) => {
     // init
     let instance: any;
     let parameters: any = {};
-    let initValue: any;
+    let value: any;
     if (color_support) {
       instance = scheme;
       parameters.color_model = scheme;
-      initValue = scheme == 'hsv' ? {h: 0, s: 0, v: 0} : Number(0.0);
+      value = scheme == 'hsv' ? {h: 0, s: 0, v: 0} : Number(0.0);
     }
     if (temperature_k) {
       instance = 'temperature_k';
@@ -75,7 +75,7 @@ module.exports = (RED: NodeAPI) => {
         min: temperature_min,
         max: temperature_max
       };
-      initValue = Number(4500);
+      value = Number(4500);
     }
     if (color_scene.length > 0) {
       instance = 'scene';
@@ -86,10 +86,10 @@ module.exports = (RED: NodeAPI) => {
       parameters.color_scene = {
         scenes: scenes
       };
-      initValue = 'alice';
+      value = 'alice';
     }
 
-    let value = device.storage[`${ctype}-${instance}`] || initValue;
+    value = device.storage[`${ctype}-${instance}`] || value;
 
     // init
     try {
