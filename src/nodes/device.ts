@@ -3,6 +3,7 @@ import {Storage} from '../lib/storage';
 import {StorageUserType} from '../lib/types';
 import {Api} from '../lib/api';
 import {AxiosError} from 'axios';
+import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-device', function (this: any, config: any) {
@@ -165,7 +166,13 @@ module.exports = (RED: NodeAPI) => {
           } catch (error) {
             const _error = error as AxiosError;
             const status = _error.response?.status;
-            const text = (_error.response?.data as string).replace(/^\n+|\n+$/g, '');
+            let text = _error.response?.data;
+            if (typeof text === 'object') {
+              text = inspect(text);
+            }
+            if (typeof text === 'string') {
+              text = text.replace(/^\n+|\n+$/g, '');
+            }
             self.error(`updateStateDevice(${u.login}): ${status} - ${text}`);
           }
         }
@@ -198,7 +205,13 @@ module.exports = (RED: NodeAPI) => {
           } catch (error) {
             const _error = error as AxiosError;
             const status = _error.response?.status;
-            const text = (_error.response?.data as string).replace(/^\n+|\n+$/g, '');
+            let text = _error.response?.data;
+            if (typeof text === 'object') {
+              text = inspect(text);
+            }
+            if (typeof text === 'string') {
+              text = text.replace(/^\n+|\n+$/g, '');
+            }
             self.error(`updateInfoDevice(${u.login}): ${status} - ${text}`);
           }
         }

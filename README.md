@@ -25,7 +25,7 @@ Node-RED nodes to Yandex Alice devices in Self-Hosting
 
 ## Security
 
-Этот юзел должен быть спрятана за сервисам nginx, ngrok, cloudflare и т.д., есть риск **получить полный доступ** к Node-RED
+Этот узел должен быть спрятан за сервисам nginx, ngrok, cloudflare и т.д., есть риск **получить полный доступ** к Node-RED
 
 ## Install
 

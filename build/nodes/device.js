@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const storage_1 = require("../lib/storage");
 const api_1 = require("../lib/api");
+const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-device', function (config) {
         const self = this;
@@ -166,7 +167,13 @@ module.exports = (RED) => {
                         catch (error) {
                             const _error = error;
                             const status = (_c = _error.response) === null || _c === void 0 ? void 0 : _c.status;
-                            const text = ((_d = _error.response) === null || _d === void 0 ? void 0 : _d.data).replace(/^\n+|\n+$/g, '');
+                            let text = (_d = _error.response) === null || _d === void 0 ? void 0 : _d.data;
+                            if (typeof text === 'object') {
+                                text = (0, util_1.inspect)(text);
+                            }
+                            if (typeof text === 'string') {
+                                text = text.replace(/^\n+|\n+$/g, '');
+                            }
                             self.error(`updateStateDevice(${u.login}): ${status} - ${text}`);
                         }
                     }
@@ -199,7 +206,13 @@ module.exports = (RED) => {
                         catch (error) {
                             const _error = error;
                             const status = (_c = _error.response) === null || _c === void 0 ? void 0 : _c.status;
-                            const text = ((_d = _error.response) === null || _d === void 0 ? void 0 : _d.data).replace(/^\n+|\n+$/g, '');
+                            let text = (_d = _error.response) === null || _d === void 0 ? void 0 : _d.data;
+                            if (typeof text === 'object') {
+                                text = (0, util_1.inspect)(text);
+                            }
+                            if (typeof text === 'string') {
+                                text = text.replace(/^\n+|\n+$/g, '');
+                            }
                             self.error(`updateInfoDevice(${u.login}): ${status} - ${text}`);
                         }
                     }
