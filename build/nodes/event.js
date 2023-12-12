@@ -55,7 +55,7 @@ module.exports = (RED) => {
         if (!device)
             return;
         // init
-        let value = device.storage[`${ptype}-${instance}`] || '';
+        let value = device.storage[`${ptype}-${instance}`] || null;
         // init
         try {
             setStatus({});

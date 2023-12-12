@@ -14,10 +14,18 @@
       let node = this;
 
       if (node.path) {
-        $('#webhook').text(window.location.origin + '/' + node.path + '/webhook');
+        setUrl(node.path);
       } else {
         let $path = (Math.random() + 1).toString(36).substring(2);
         $('#node-config-input-path').val($path);
+        setUrl($path);
+      }
+
+      $('#set_url').on('click', () => {
+        setUrl($('#node-config-input-path').val());
+      });
+
+      function setUrl($path) {
         $('#webhook').text(window.location.origin + '/' + $path + '/webhook');
       }
     }
@@ -37,7 +45,8 @@
 
   <div class="form-row">
     <label for="node-config-input-path"><i class="fa fa-globe"></i> Path Url</label>
-    <input type="text" id="node-config-input-path" placeholder="Path Url" />
+    <input type="text" id="node-config-input-path" placeholder="Path Url" style="width: auto;" />
+    <button id="set_url" class="ui-button">Set</button>
   </div>
 
   <div class="form-row">
