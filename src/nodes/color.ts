@@ -12,7 +12,7 @@ module.exports = (RED: NodeAPI) => {
     const name = config.name;
     const device = RED.nodes.getNode(config.device) as any;
     const ctype = 'devices.capabilities.color_setting';
-    const retrievable = config.retrievable;
+    const retrievable = true;
     const reportable = config.response; // reportable = response
     const color_support = config.color_support;
     const scheme = config.scheme;
