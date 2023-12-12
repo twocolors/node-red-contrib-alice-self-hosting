@@ -1,15 +1,15 @@
 {
-  "name": "node-red-contrib-alice-sh",
+  "name": "node-red-contrib-alice-self-hosting",
   "version": "0.0.1",
   "description": "Node-RED nodes to Yandex Alice devices in Self-Hosting",
-  "homepage": "https://github.com/twocolors/node-red-contrib-alice-sh",
+  "homepage": "https://github.com/twocolors/node-red-contrib-alice-self-hosting",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/twocolors/node-red-contrib-alice-sh.git"
+    "url": "git+https://github.com/twocolors/node-red-contrib-alice-self-hosting.git"
   },
   "bugs": {
-    "url": "https://github.com/twocolors/node-red-contrib-alice-sh/issues"
+    "url": "https://github.com/twocolors/node-red-contrib-alice-self-hosting/issues"
   },
   "author": "D",
   "scripts": {
