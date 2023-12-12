@@ -11,21 +11,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("util");
 module.exports = (RED) => {
-    RED.nodes.registerType('alice-sh-range', function (config) {
+    RED.nodes.registerType('alice-sh-color', function (config) {
         const self = this;
         self.config = config;
         RED.nodes.createNode(this, config);
         // var
         const name = config.name;
         const device = RED.nodes.getNode(config.device);
-        const ctype = 'devices.capabilities.range';
-        const instance = config.instance;
+        const ctype = 'devices.capabilities.color_setting';
         const retrievable = config.retrievable;
         const reportable = config.response; // reportable = response
-        const unit = config.unit;
-        const min = parseFloat(config.min) || 0;
-        const max = parseFloat(config.max) || 100;
-        const precision = parseFloat(config.precision) || 1;
+        const color_support = config.color_support;
+        const scheme = config.scheme;
+        const temperature_k = config.temperature_k;
+        const temperature_min = parseInt(config.temperature_min);
+        const temperature_max = parseInt(config.temperature_max);
+        const color_scene = config.color_scene || [];
         // helpers
         const clearStatus = (timeout = 0) => {
             setTimeout(() => {
@@ -54,11 +55,44 @@ module.exports = (RED) => {
                 setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
             }
         });
+        if (!color_support && !temperature_k && color_scene.length < 1) {
+            const text = `Error on create capability: At least one parameter must be enabled`;
+            self.error(text);
+            setStatus({ fill: 'red', shape: 'dot', text: text }, 5000);
+            return;
+        }
         // device not init
         if (!device)
             return;
         // init
-        let value = device.storage[`${ctype}-${instance}`] || Number(0.0);
+        let instance;
+        let parameters = {};
+        let initValue;
+        if (color_support) {
+            instance = scheme;
+            parameters.color_model = scheme;
+            initValue = scheme == 'hsv' ? { h: 0, s: 0, v: 0 } : Number(0.0);
+        }
+        if (temperature_k) {
+            instance = 'temperature_k';
+            parameters.temperature_k = {
+                min: temperature_min,
+                max: temperature_max
+            };
+            initValue = Number(4500);
+        }
+        if (color_scene.length > 0) {
+            instance = 'scene';
+            let scenes = [];
+            color_scene.forEach((s) => {
+                scenes.push({ id: s });
+            });
+            parameters.color_scene = {
+                scenes: scenes
+            };
+            initValue = 'alice';
+        }
+        let value = device.storage[`${ctype}-${instance}`] || initValue;
         // init
         try {
             setStatus({});
@@ -70,16 +104,7 @@ module.exports = (RED) => {
                     instance: instance,
                     value: value
                 },
-                parameters: {
-                    instance: instance,
-                    unit: unit,
-                    random_access: true,
-                    range: {
-                        min: min,
-                        max: max,
-                        precision: precision
-                    }
-                }
+                parameters
             }, ctype, instance);
         }
         catch (error) {
@@ -106,22 +131,14 @@ module.exports = (RED) => {
             yield _updateStateDevice();
         }));
         const onState = (object) => {
-            var _a, _b, _c, _d, _e, _f, _g;
+            var _a, _b, _c;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
-                let _value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
-                if (retrievable && ((_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.relative)) {
-                    _value = value + ((_d = object === null || object === void 0 ? void 0 : object.state) === null || _d === void 0 ? void 0 : _d.value);
-                    if (((_e = object === null || object === void 0 ? void 0 : object.state) === null || _e === void 0 ? void 0 : _e.value) < 0 && _value < min)
-                        _value = min;
-                    if (((_f = object === null || object === void 0 ? void 0 : object.state) === null || _f === void 0 ? void 0 : _f.value) > 0 && _value > max)
-                        _value = max;
-                }
-                value = _value;
+                value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
                 device.updateState(value, ctype, instance);
                 self.send({
                     payload: value,
                     type: object === null || object === void 0 ? void 0 : object.type,
-                    instance: (_g = object === null || object === void 0 ? void 0 : object.state) === null || _g === void 0 ? void 0 : _g.instance
+                    instance: (_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.instance
                 });
                 if (reportable) {
                     _updateStateDevice();
@@ -141,4 +158,4 @@ module.exports = (RED) => {
         }));
     });
 };
-//# sourceMappingURL=range.js.map
+//# sourceMappingURL=color.js.map

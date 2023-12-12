@@ -27,7 +27,8 @@
       "sensor": "build/nodes/sensor.js",
       "onoff": "build/nodes/onoff.js",
       "toggle": "build/nodes/toggle.js",
-      "range":"build/nodes/range.js"
+      "range":"build/nodes/range.js",
+      "color":"build/nodes/color.js"
     }
   },
   "dependencies": {

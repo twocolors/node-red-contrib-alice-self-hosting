@@ -106,7 +106,9 @@ module.exports = (RED: NodeAPI) => {
         device.updateState(value, ctype, instance);
 
         self.send({
-          payload: value
+          payload: value,
+          type: object?.type,
+          instance: object?.state?.instance
         });
 
         if (reportable) {

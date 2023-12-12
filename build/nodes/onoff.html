@@ -1,7 +1,7 @@
 <script type="text/javascript">
   RED.nodes.registerType('alice-sh-onoff', {
     category: 'alice',
-    paletteLabel: 'on/off',
+    paletteLabel: 'on_off',
     icon: 'alice.svg',
     align: 'left',
     color: '#f2f3f5',
@@ -14,7 +14,7 @@
     inputs: 1,
     outputs: 1,
     label: function () {
-      return this.name + ':On/Off';
+      return this.name + ':On_Off';
     },
     oneditprepare: function () {
       if (this.response === undefined) {

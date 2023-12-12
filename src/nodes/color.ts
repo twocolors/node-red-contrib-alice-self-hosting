@@ -2,7 +2,7 @@ import {NodeAPI} from 'node-red';
 import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
-  RED.nodes.registerType('alice-sh-onoff', function (this: any, config: any) {
+  RED.nodes.registerType('alice-sh-color', function (this: any, config: any) {
     const self = this;
     self.config = config;
 
@@ -11,10 +11,15 @@ module.exports = (RED: NodeAPI) => {
     // var
     const name = config.name;
     const device = RED.nodes.getNode(config.device) as any;
-    const ctype = 'devices.capabilities.on_off';
-    const instance = 'on';
+    const ctype = 'devices.capabilities.color_setting';
     const retrievable = config.retrievable;
     const reportable = config.response; // reportable = response
+    const color_support = config.color_support;
+    const scheme = config.scheme;
+    const temperature_k = config.temperature_k;
+    const temperature_min = parseInt(config.temperature_min);
+    const temperature_max = parseInt(config.temperature_max);
+    const color_scene = config.color_scene || [];
 
     // helpers
     const clearStatus = (timeout = 0) => {
@@ -46,10 +51,45 @@ module.exports = (RED: NodeAPI) => {
       }
     };
 
+    if (!color_support && !temperature_k && color_scene.length < 1) {
+      const text = `Error on create capability: At least one parameter must be enabled`;
+      self.error(text);
+      setStatus({fill: 'red', shape: 'dot', text: text}, 5000);
+      return;
+    }
+
     // device not init
     if (!device) return;
     // init
-    let value = device.storage[`${ctype}-${instance}`] || Boolean(false);
+    let instance: any;
+    let parameters: any = {};
+    let initValue: any;
+    if (color_support) {
+      instance = scheme;
+      parameters.color_model = scheme;
+      initValue = scheme == 'hsv' ? {h: 0, s: 0, v: 0} : Number(0.0);
+    }
+    if (temperature_k) {
+      instance = 'temperature_k';
+      parameters.temperature_k = {
+        min: temperature_min,
+        max: temperature_max
+      };
+      initValue = Number(4500);
+    }
+    if (color_scene.length > 0) {
+      instance = 'scene';
+      let scenes: any = [];
+      color_scene.forEach((s: any) => {
+        scenes.push({id: s});
+      });
+      parameters.color_scene = {
+        scenes: scenes
+      };
+      initValue = 'alice';
+    }
+
+    let value = device.storage[`${ctype}-${instance}`] || initValue;
 
     // init
     try {
@@ -64,10 +104,7 @@ module.exports = (RED: NodeAPI) => {
             instance: instance,
             value: value
           },
-          parameters: {
-            instance: instance,
-            split: !retrievable ? true : false
-          }
+          parameters
         },
         ctype,
         instance

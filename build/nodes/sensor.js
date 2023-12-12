@@ -99,6 +99,7 @@ module.exports = (RED) => {
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeProperty(ptype, instance);
             if (removed) {
+                device.storage[`${ptype}-${instance}`] = undefined;
                 yield _updateInfoDevice();
                 yield _updateStateDevice();
             }

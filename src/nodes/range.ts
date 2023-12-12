@@ -116,8 +116,8 @@ module.exports = (RED: NodeAPI) => {
 
         if (retrievable && object?.state?.relative) {
           _value = value + object?.state?.value;
-          if (object?.state?.value < 0 && _value < this.min) _value = this.min;
-          if (object?.state?.value > 0 && _value > this.max) _value = this.max;
+          if (object?.state?.value < 0 && _value < min) _value = min;
+          if (object?.state?.value > 0 && _value > max) _value = max;
         }
 
         value = _value;
@@ -125,7 +125,9 @@ module.exports = (RED: NodeAPI) => {
         device.updateState(value, ctype, instance);
 
         self.send({
-          payload: value
+          payload: value,
+          type: object?.type,
+          instance: object?.state?.instance
         });
 
         if (reportable) {

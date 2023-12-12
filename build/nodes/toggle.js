@@ -95,12 +95,14 @@ module.exports = (RED) => {
             yield _updateStateDevice();
         }));
         const onState = (object) => {
-            var _a, _b;
+            var _a, _b, _c;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
                 value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
                 device.updateState(value, ctype, instance);
                 self.send({
-                    payload: value
+                    payload: value,
+                    type: object === null || object === void 0 ? void 0 : object.type,
+                    instance: (_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.instance
                 });
                 if (reportable) {
                     _updateStateDevice();
@@ -111,6 +113,7 @@ module.exports = (RED) => {
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeCapability(ctype, instance);
             if (removed) {
+                device.storage[`${ctype}-${instance}`] = undefined;
                 yield _updateInfoDevice();
                 yield _updateStateDevice();
             }
