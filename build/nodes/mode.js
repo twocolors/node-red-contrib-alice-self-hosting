@@ -11,22 +11,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("util");
 module.exports = (RED) => {
-    RED.nodes.registerType('alice-sh-color', function (config) {
+    RED.nodes.registerType('alice-sh-mode', function (config) {
         const self = this;
         self.config = config;
         RED.nodes.createNode(this, config);
         // var
         const name = config.name;
         const device = RED.nodes.getNode(config.device);
-        const ctype = 'devices.capabilities.color_setting';
+        const ctype = 'devices.capabilities.mode';
         const retrievable = true;
         const reportable = config.response; // reportable = response
-        const color_support = config.color_support;
-        const scheme = config.scheme;
-        const temperature_k = config.temperature_k;
-        const temperature_min = parseInt(config.temperature_min);
-        const temperature_max = parseInt(config.temperature_max);
-        const color_scene = config.color_scene || [];
+        const instance = config.instance;
+        const modes = config.modes;
         // helpers
         const clearStatus = (timeout = 0) => {
             setTimeout(() => {
@@ -55,8 +51,8 @@ module.exports = (RED) => {
                 setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
             }
         });
-        if (!color_support && !temperature_k && color_scene.length < 1) {
-            const text = `Error on create capability: At least one parameter must be enabled`;
+        if (modes.length < 1) {
+            const text = `In the list of supported commands, there must be at least one command`;
             self.error(text);
             setStatus({ fill: 'red', shape: 'dot', text: text }, 5000);
             return;
@@ -65,37 +61,14 @@ module.exports = (RED) => {
         if (!device)
             return;
         // init
-        let instance;
-        let parameters = {};
-        let value;
-        if (color_support) {
-            instance = scheme;
-            parameters.color_model = scheme;
-            value = scheme == 'hsv' ? { h: 0, s: 0, v: 0 } : Number(0.0);
-        }
-        if (temperature_k) {
-            instance = 'temperature_k';
-            parameters.temperature_k = {
-                min: temperature_min,
-                max: temperature_max
-            };
-            value = Number(4500);
-        }
-        if (color_scene.length > 0) {
-            instance = 'scene';
-            let scenes = [];
-            color_scene.forEach((s) => {
-                scenes.push({ id: s });
-            });
-            parameters.color_scene = {
-                scenes: scenes
-            };
-            value = 'alice';
-        }
-        value = device.storage[`${ctype}-${instance}`] || value;
+        let value = device.storage[`${ctype}-${instance}`] || String('auto');
         // init
         try {
             setStatus({});
+            let _modes = [];
+            modes.forEach((v) => {
+                _modes.push({ value: v });
+            });
             device.setCapability({
                 type: ctype,
                 reportable: reportable,
@@ -104,7 +77,10 @@ module.exports = (RED) => {
                     instance: instance,
                     value: value
                 },
-                parameters
+                parameters: {
+                    instance: instance,
+                    modes: _modes
+                }
             }, ctype, instance);
         }
         catch (error) {
@@ -158,4 +134,4 @@ module.exports = (RED) => {
         }));
     });
 };
-//# sourceMappingURL=color.js.map
+//# sourceMappingURL=mode.js.map
