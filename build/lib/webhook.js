@@ -13,13 +13,13 @@ const storage_1 = require("./storage");
 const api_1 = require("./api");
 module.exports = (RED) => {
     const _pong = (req, res) => {
-        console.log(req.route.path);
+        // console.log(req.route.path);
         res.sendStatus(200);
         return;
     };
     const _unlink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
-        console.log(req.route.path);
+        // console.log(req.route.path);
         // TODO: write middleware for validate ...
         const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
         if (request_id === undefined || token === undefined) {
@@ -56,7 +56,7 @@ module.exports = (RED) => {
     };
     const _devices = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _b;
-        console.log(req.route.path);
+        // console.log(req.route.path);
         // TODO: write middleware for validate ...
         const [request_id, token] = [req.get('X-Request-Id'), (_b = req.get('Authorization')) === null || _b === void 0 ? void 0 : _b.split(' ')[1]];
         if (request_id === undefined || token === undefined) {
@@ -113,7 +113,7 @@ module.exports = (RED) => {
     };
     const _query = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _c, _d, _e, _f;
-        console.log(req.route.path);
+        // console.log(req.route.path);
         // TODO: write middleware for validate ...
         const [request_id, token] = [req.get('X-Request-Id'), (_c = req.get('Authorization')) === null || _c === void 0 ? void 0 : _c.split(' ')[1]];
         if (request_id === undefined || token === undefined) {
@@ -193,7 +193,7 @@ module.exports = (RED) => {
     };
     const _action = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var _g, _h, _j, _k, _l, _m;
-        console.log(req.route.path);
+        // console.log(req.route.path);
         // TODO: write middleware for validate ...
         const [request_id, token] = [req.get('X-Request-Id'), (_g = req.get('Authorization')) === null || _g === void 0 ? void 0 : _g.split(' ')[1]];
         if (request_id === undefined || token === undefined) {

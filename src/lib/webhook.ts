@@ -6,13 +6,13 @@ import {Api} from './api';
 
 module.exports = (RED: NodeAPI) => {
   const _pong = (req: express.Request, res: express.Response) => {
-    console.log(req.route.path);
+    // console.log(req.route.path);
     res.sendStatus(200);
     return;
   };
 
   const _unlink = async (req: express.Request, res: express.Response) => {
-    console.log(req.route.path);
+    // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
 
@@ -53,7 +53,7 @@ module.exports = (RED: NodeAPI) => {
   };
 
   const _devices = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
-    console.log(req.route.path);
+    // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
 
@@ -114,7 +114,7 @@ module.exports = (RED: NodeAPI) => {
   };
 
   const _query = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
-    console.log(req.route.path);
+    // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
 
@@ -200,7 +200,7 @@ module.exports = (RED: NodeAPI) => {
   };
 
   const _action = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
-    console.log(req.route.path);
+    // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
 

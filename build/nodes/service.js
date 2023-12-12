@@ -49,7 +49,7 @@ module.exports = (RED) => {
                 for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
                     let route = RED.httpNode._router.stack[i];
                     if (route.route && _trim(route.route.path) === _trim(config.path)) {
-                        console.log(`${i} - delete - ${route.route.path}`);
+                        // console.log(`${i} - delete - ${route.route.path}`);
                         RED.httpNode._router.stack.splice(i, 1);
                     }
                 }
