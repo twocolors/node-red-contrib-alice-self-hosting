@@ -231,7 +231,8 @@ module.exports = (RED) => {
         return;
     });
     const init = (node) => {
-        const _path = `/${node.config.path.replace(/^\/|\/$/g, '')}/webhook`;
+        const credentials = RED.nodes.getCredentials(node.id);
+        const _path = `/${credentials.path.replace(/^\/|\/$/g, '')}/webhook`;
         // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
         RED.httpNode.head(`${_path}/v1.0/`, (req, res) => _pong(req, res));
         // POST /v1.0/user/unlink         Оповещение о разъединении аккаунтов

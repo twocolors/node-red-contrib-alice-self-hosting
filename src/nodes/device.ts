@@ -142,8 +142,8 @@ module.exports = (RED: NodeAPI) => {
     // state device
     self.updateStateDevice = async function () {
       const node_id = service.id;
-      const skill_id = service.config?.skill_id;
-      const oauth_token = service.config?.oauth_token;
+      const skill_id = service.credentials?.skill_id;
+      const oauth_token = service.credentials?.oauth_token;
       const device = self.device;
 
       if (!skill_id) {
@@ -182,8 +182,8 @@ module.exports = (RED: NodeAPI) => {
     // info device
     self.updateInfoDevice = async function () {
       const node_id = service.id;
-      const skill_id = service.config?.skill_id;
-      const oauth_token = service.config?.oauth_token;
+      const skill_id = service.credentials?.skill_id;
+      const oauth_token = service.credentials?.oauth_token;
 
       if (!skill_id) {
         throw new Error(`Parameters 'skill_id' is not set in parents`);

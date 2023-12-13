@@ -243,7 +243,8 @@ module.exports = (RED: NodeAPI) => {
   };
 
   const init = (node: NodeConfigType) => {
-    const _path = `/${node.config.path.replace(/^\/|\/$/g, '')}/webhook`;
+    const credentials: any = RED.nodes.getCredentials(node.id);
+    const _path = `/${credentials.path.replace(/^\/|\/$/g, '')}/webhook`;
 
     // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
     RED.httpNode.head(`${_path}/v1.0/`, (req: express.Request, res: express.Response) => _pong(req, res));

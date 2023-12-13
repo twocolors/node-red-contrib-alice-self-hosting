@@ -33,11 +33,12 @@ module.exports = (RED) => {
     }
     storage_1.Storage.init(userDir, 'alice-sh').then(() => {
         RED.nodes.registerType('alice-sh-service', function (config) {
+            var _a;
             const self = this;
             self.config = config;
             RED.nodes.createNode(self, config);
             // re-init webhook
-            if (config.path) {
+            if ((_a = self.credentials) === null || _a === void 0 ? void 0 : _a.path) {
                 webhook.init(self);
             }
             else {
@@ -48,12 +49,18 @@ module.exports = (RED) => {
                 const _trim = (path) => path.replace(/^\/|\/$/g, '').split('/')[0];
                 for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
                     let route = RED.httpNode._router.stack[i];
-                    if (route.route && _trim(route.route.path) === _trim(config.path)) {
+                    if (route.route && _trim(route.route.path) === _trim(self.credentials.path)) {
                         // console.log(`${i} - delete - ${route.route.path}`);
                         RED.httpNode._router.stack.splice(i, 1);
                     }
                 }
             });
+        }, {
+            credentials: {
+                skill_id: { type: 'text' },
+                oauth_token: { type: 'text' },
+                path: { type: 'text' }
+            }
         });
     });
 };

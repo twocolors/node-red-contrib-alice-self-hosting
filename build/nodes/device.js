@@ -145,8 +145,8 @@ module.exports = (RED) => {
             var _a, _b;
             return __awaiter(this, void 0, void 0, function* () {
                 const node_id = service.id;
-                const skill_id = (_a = service.config) === null || _a === void 0 ? void 0 : _a.skill_id;
-                const oauth_token = (_b = service.config) === null || _b === void 0 ? void 0 : _b.oauth_token;
+                const skill_id = (_a = service.credentials) === null || _a === void 0 ? void 0 : _a.skill_id;
+                const oauth_token = (_b = service.credentials) === null || _b === void 0 ? void 0 : _b.oauth_token;
                 const device = self.device;
                 if (!skill_id) {
                     throw new Error(`Parameters 'skill_id' is not set in parents`);
@@ -185,8 +185,8 @@ module.exports = (RED) => {
             var _a, _b;
             return __awaiter(this, void 0, void 0, function* () {
                 const node_id = service.id;
-                const skill_id = (_a = service.config) === null || _a === void 0 ? void 0 : _a.skill_id;
-                const oauth_token = (_b = service.config) === null || _b === void 0 ? void 0 : _b.oauth_token;
+                const skill_id = (_a = service.credentials) === null || _a === void 0 ? void 0 : _a.skill_id;
+                const oauth_token = (_b = service.credentials) === null || _b === void 0 ? void 0 : _b.oauth_token;
                 if (!skill_id) {
                     throw new Error(`Parameters 'skill_id' is not set in parents`);
                 }

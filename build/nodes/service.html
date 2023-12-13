@@ -2,10 +2,12 @@
   RED.nodes.registerType('alice-sh-service', {
     category: 'config',
     defaults: {
-      name: {},
-      skill_id: {value: '', required: true},
-      path: {value: '', required: true},
-      oauth_token: {value: '', required: true},
+      name: {}
+    },
+    credentials: {
+      skill_id: {type: 'text', value: '', required: true},
+      oauth_token: {type: 'text', value: '', required: true},
+      path: {type: 'text', value: '', required: true}
     },
     paletteLabel: 'service',
     label: function () {
@@ -15,19 +17,24 @@
       let node = this;
 
       if (node.path) {
-        setUrl(node.path);
+        _path(node.path);
       } else {
-        let $path = (Math.random() + 1).toString(36).substring(2);
-        $('#node-config-input-path').val($path);
-        setUrl($path);
+        const path = (Math.random() + 1).toString(36).substring(2);
+        _path(path);
       }
 
-      $('#set_url').on('click', () => {
-        setUrl($('#node-config-input-path').val());
+      $('#set_path').on('click', () => {
+        const path = $('#node-config-input-path').val();
+        if (path) {
+          _path(path);
+        } else {
+          RED.notify(`Not input 'Path Url' for webhook`, 'error');
+        }
       });
 
-      function setUrl($path) {
-        $('#webhook').text(window.location.origin + '/' + $path + '/webhook');
+      function _path(path) {
+        $('#node-config-input-path').val(path);
+        $('#webhook').text(window.location.origin + '/' + path + '/webhook');
       }
     }
   });
@@ -45,14 +52,14 @@
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-oauth_token"><i class="fa fa-key"></i> OAuth token</label>
-    <input type="text" id="node-config-input-oauth_token" placeholder="OAuth token" />
+    <label for="node-config-input-oauth_token"><i class="fa fa-key"></i> OAuth Token</label>
+    <input type="text" id="node-config-input-oauth_token" placeholder="OAuth Token" />
   </div>
 
   <div class="form-row">
     <label for="node-config-input-path"><i class="fa fa-globe"></i> Path Url</label>
     <input type="text" id="node-config-input-path" placeholder="Path Url" style="width: auto;" />
-    <button id="set_url" class="ui-button">Set</button>
+    <button id="set_path" class="ui-button">Set</button>
   </div>
 
   <div class="form-row">
@@ -68,8 +75,14 @@
   <dl class="message-properties">
     <dt class="required">Skill Id<span class="property-type">string</span></dt>
     <dd>Skill Id from Yandex Dialogs</dd>
-    <dt class="required">OAuth token<span class="property-type">string</span></dt>
-    <dd>OAuth token for Notification service <a href="https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/resources-alerts.html?lang=en#resources-alerts__oauth">more</a></dd>
+    <dt class="required">OAuth Token<span class="property-type">string</span></dt>
+    <dd>
+      OAuth Token for Notification service
+      <a
+        href="https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/resources-alerts.html?lang=en#resources-alerts__oauth"
+        >more</a
+      >
+    </dd>
     <dt class="required">Path Url<span class="property-type">string</span></dt>
     <dd>Webhook path url for Yandex Dialogs</dd>
   </dl>
