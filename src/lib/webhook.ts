@@ -1,4 +1,4 @@
-import {NodeAPI} from 'node-red';
+import {NodeAPI, Node} from 'node-red';
 import express from 'express';
 import {Storage} from './storage';
 import {NodeConfigType, StorageUserType} from './types';
@@ -52,7 +52,7 @@ module.exports = (RED: NodeAPI) => {
     return devices;
   };
 
-  const _devices = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
+  const _devices = async (node: Node, req: express.Request, res: express.Response) => {
     // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
@@ -113,7 +113,7 @@ module.exports = (RED: NodeAPI) => {
     return devices;
   };
 
-  const _query = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
+  const _query = async (node: Node, req: express.Request, res: express.Response) => {
     // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
@@ -199,7 +199,7 @@ module.exports = (RED: NodeAPI) => {
     return devices;
   };
 
-  const _action = async (node: NodeConfigType, req: express.Request, res: express.Response) => {
+  const _action = async (node: Node, req: express.Request, res: express.Response) => {
     // console.log(req.route.path);
     // TODO: write middleware for validate ...
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
@@ -242,35 +242,54 @@ module.exports = (RED: NodeAPI) => {
     return;
   };
 
-  const init = (node: NodeConfigType) => {
-    const credentials: any = RED.nodes.getCredentials(node.id);
-    const _path = `/${credentials.path.replace(/^\/|\/$/g, '')}/webhook`;
+  const buildPath = function (path: string): string {
+    return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
+  };
+
+  const publish = function (self: Node) {
+    const credentials: any = self.credentials;
+    const path = buildPath(credentials.path);
 
     // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
-    RED.httpNode.head(`${_path}/v1.0/`, (req: express.Request, res: express.Response) => _pong(req, res));
+    RED.httpNode.head(`${path}/v1.0/`, (req: express.Request, res: express.Response) => _pong(req, res));
     // POST /v1.0/user/unlink         Оповещение о разъединении аккаунтов
     RED.httpNode.post(
-      `${_path}/v1.0/user/unlink`,
+      `${path}/v1.0/user/unlink`,
       async (req: express.Request, res: express.Response) => await _unlink(req, res)
     );
     // GET  /v1.0/user/devices        Информация об устройствах пользователя
     RED.httpNode.get(
-      `${_path}/v1.0/user/devices`,
-      async (req: express.Request, res: express.Response) => await _devices(node, req, res)
+      `${path}/v1.0/user/devices`,
+      async (req: express.Request, res: express.Response) => await _devices(self, req, res)
     );
     // POST /v1.0/user/devices/query  Информация о состояниях устройств пользователя
     RED.httpNode.post(
-      `${_path}/v1.0/user/devices/query`,
-      async (req: express.Request, res: express.Response) => await _query(node, req, res)
+      `${path}/v1.0/user/devices/query`,
+      async (req: express.Request, res: express.Response) => await _query(self, req, res)
     );
     // POST /v1.0/user/devices/action	Изменение состояния у устройств
     RED.httpNode.post(
-      `${_path}/v1.0/user/devices/action`,
-      async (req: express.Request, res: express.Response) => await _action(node, req, res)
+      `${path}/v1.0/user/devices/action`,
+      async (req: express.Request, res: express.Response) => await _action(self, req, res)
     );
   };
 
+  const unpublish = function (self: Node) {
+    const credentials: any = self.credentials;
+    const path = buildPath(credentials.path);
+    const pathRegexp = new RegExp(`^${path}`, 'g');
+
+    for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
+      let route = RED.httpNode._router.stack[i];
+      if (route.route && route.route.path.match(pathRegexp)) {
+        // console.log(`${i} - delete - ${route.route.path}`);
+        RED.httpNode._router.stack.splice(i, 1);
+      }
+    }
+  };
+
   return {
-    init
+    publish,
+    unpublish
   };
 };

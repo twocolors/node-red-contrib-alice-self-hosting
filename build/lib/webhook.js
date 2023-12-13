@@ -230,22 +230,38 @@ module.exports = (RED) => {
         res.status(200).json(json);
         return;
     });
-    const init = (node) => {
-        const credentials = RED.nodes.getCredentials(node.id);
-        const _path = `/${credentials.path.replace(/^\/|\/$/g, '')}/webhook`;
+    const buildPath = function (path) {
+        return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
+    };
+    const publish = function (self) {
+        const credentials = self.credentials;
+        const path = buildPath(credentials.path);
         // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
-        RED.httpNode.head(`${_path}/v1.0/`, (req, res) => _pong(req, res));
+        RED.httpNode.head(`${path}/v1.0/`, (req, res) => _pong(req, res));
         // POST /v1.0/user/unlink         Оповещение о разъединении аккаунтов
-        RED.httpNode.post(`${_path}/v1.0/user/unlink`, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return yield _unlink(req, res); }));
+        RED.httpNode.post(`${path}/v1.0/user/unlink`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _unlink(req, res); }));
         // GET  /v1.0/user/devices        Информация об устройствах пользователя
-        RED.httpNode.get(`${_path}/v1.0/user/devices`, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return yield _devices(node, req, res); }));
+        RED.httpNode.get(`${path}/v1.0/user/devices`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _devices(self, req, res); }));
         // POST /v1.0/user/devices/query  Информация о состояниях устройств пользователя
-        RED.httpNode.post(`${_path}/v1.0/user/devices/query`, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return yield _query(node, req, res); }));
+        RED.httpNode.post(`${path}/v1.0/user/devices/query`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _query(self, req, res); }));
         // POST /v1.0/user/devices/action	Изменение состояния у устройств
-        RED.httpNode.post(`${_path}/v1.0/user/devices/action`, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return yield _action(node, req, res); }));
+        RED.httpNode.post(`${path}/v1.0/user/devices/action`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _action(self, req, res); }));
+    };
+    const unpublish = function (self) {
+        const credentials = self.credentials;
+        const path = buildPath(credentials.path);
+        const pathRegexp = new RegExp(`^${path}`, 'g');
+        for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
+            let route = RED.httpNode._router.stack[i];
+            if (route.route && route.route.path.match(pathRegexp)) {
+                // console.log(`${i} - delete - ${route.route.path}`);
+                RED.httpNode._router.stack.splice(i, 1);
+            }
+        }
     };
     return {
-        init
+        publish,
+        unpublish
     };
 };
 //# sourceMappingURL=webhook.js.map

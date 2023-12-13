@@ -27,33 +27,37 @@ const storage_1 = require("../lib/storage");
 const path = __importStar(require("path"));
 module.exports = (RED) => {
     const webhook = require('../lib/webhook')(RED);
+    const credentialsValidator = function (credentials) {
+        if (!(credentials === null || credentials === void 0 ? void 0 : credentials.skill_id)) {
+            throw new Error('Parameter `Skill Id` is required');
+        }
+        if (!(credentials === null || credentials === void 0 ? void 0 : credentials.oauth_token)) {
+            throw new Error('Parameter `OAuth Token` is required');
+        }
+        if (!(credentials === null || credentials === void 0 ? void 0 : credentials.path)) {
+            throw new Error('Parameter `Path Url` is required');
+        }
+    };
     let userDir = path.join(require('os').homedir(), '.node-red');
     if (RED.settings.available() && RED.settings.userDir) {
         userDir = RED.settings.userDir;
     }
     storage_1.Storage.init(userDir, 'alice-sh').then(() => {
         RED.nodes.registerType('alice-sh-service', function (config) {
-            var _a;
             const self = this;
             self.config = config;
             RED.nodes.createNode(self, config);
-            // re-init webhook
-            if ((_a = self.credentials) === null || _a === void 0 ? void 0 : _a.path) {
-                webhook.init(self);
+            try {
+                credentialsValidator(self.credentials);
+                webhook.publish(self);
             }
-            else {
-                self.error(`Not config 'Path Url' for webhook`);
+            catch (error) {
+                self.error(error);
+                return;
             }
-            self.on('close', function () {
-                // delete webhook
-                const _trim = (path) => path.replace(/^\/|\/$/g, '').split('/')[0];
-                for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
-                    let route = RED.httpNode._router.stack[i];
-                    if (route.route && _trim(route.route.path) === _trim(self.credentials.path)) {
-                        // console.log(`${i} - delete - ${route.route.path}`);
-                        RED.httpNode._router.stack.splice(i, 1);
-                    }
-                }
+            self.on('close', function (removed, done) {
+                webhook.unpublish(self);
+                done();
             });
         }, {
             credentials: {

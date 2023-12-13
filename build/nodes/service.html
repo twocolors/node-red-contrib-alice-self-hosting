@@ -16,8 +16,8 @@
     oneditprepare: function () {
       let node = this;
 
-      if (node.path) {
-        _path(node.path);
+      if (node.credentials && node.credentials.path) {
+        _path(node.credentials.path);
       } else {
         const path = (Math.random() + 1).toString(36).substring(2);
         _path(path);
@@ -28,7 +28,7 @@
         if (path) {
           _path(path);
         } else {
-          RED.notify(`Not input 'Path Url' for webhook`, 'error');
+          RED.notify('Parameter `Path Url` is required', 'error');
         }
       });
 
