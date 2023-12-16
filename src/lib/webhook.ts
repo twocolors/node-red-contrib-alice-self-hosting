@@ -1,173 +1,135 @@
 import {NodeAPI, Node} from 'node-red';
 import express from 'express';
-import {Storage} from './storage';
-import {NodeConfigType, StorageUserType} from './types';
+import {NodeServiceType, NodeDeviceType, StorageUserType} from './types';
 import {Api} from './api';
+import NanoCache from 'nano-cache';
 
 module.exports = (RED: NodeAPI) => {
-  const _pong = (req: express.Request, res: express.Response) => {
-    // console.log(req.route.path);
-    res.sendStatus(200);
-    return;
+  // helper
+  const buildPath = function (path: string): string {
+    return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
   };
 
-  const _unlink = async (req: express.Request, res: express.Response) => {
-    // console.log(req.route.path);
-    // TODO: write middleware for validate ...
+  // middleware
+  const _logMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
+    if (req.originalUrl) {
+      console.log(`${req.method} - ${req.originalUrl}`);
+    }
+    return next();
+  };
+  const validatorMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-
-    if (request_id === undefined || token === undefined) {
-      res.sendStatus(401);
-      return;
-    }
-
-    const user = await Storage.getUserByToken(token);
-    if (user) {
-      // TODO: bad hack
-      try {
-        await Storage.removeUser(user);
-      } catch (_) {}
-      res.sendStatus(200);
-      return;
-    }
-
-    res.sendStatus(404);
-    return;
+    if (request_id && token) return next();
+    return res.sendStatus(404);
   };
+  const authenticationMiddleware = (node: NodeServiceType) => {
+    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const cache: NanoCache = node.cache;
+      const token: string | undefined = req.get('Authorization')?.split(' ')[1];
+      const key: string = `${token}-${node.id}`;
 
-  const devices = (user: StorageUserType) => {
-    const devices: any = [];
-    RED.nodes.eachNode(node => {
-      const device = RED.nodes.getNode(node.id) as NodeConfigType;
-      if (device && device.config?.service && device.config?.service === user.node_id) {
-        if (
-          !device.config?.access ||
-          device.config?.access === undefined ||
-          device.config?.access?.split(',').includes(String(user.login))
-        ) {
-          devices.push(device.device);
-        }
+      if (cache.get(key)) {
+        return next();
       }
-    });
-    return devices;
-  };
 
-  const _devices = async (node: Node, req: express.Request, res: express.Response) => {
-    // console.log(req.route.path);
-    // TODO: write middleware for validate ...
-    const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-
-    if (request_id === undefined || token === undefined) {
-      res.sendStatus(401);
-      return;
-    }
-
-    // TODO: write middleware for auth ...
-    let user = (await Storage.getUserByToken(token)) as StorageUserType;
-    if (!user) {
       try {
-        user = await Api.login(token);
+        const user = await Api.login(token);
+        cache.set(key, user);
       } catch (error) {
-        RED.log.error(`fail authorization user (${error})`);
-        res.sendStatus(401);
-        return;
+        return res.sendStatus(401);
       }
-    }
-    // TODO: MB change node.id (or empty) update User
-    if (user.node_id === undefined || user.node_id != node.id) {
-      await Storage.updateUser({...user, token, node_id: node.id} as StorageUserType);
-    }
 
-    let json = {
-      request_id: request_id,
-      payload: {
-        user_id: `${user.login}-${user.id}`,
-        devices: devices(user) as any
-      }
+      return next();
     };
-
-    res.status(200).json(json);
-    return;
   };
 
-  const query = (user: StorageUserType, id: any) => {
-    const devices: any = [];
-    id.forEach((e: any) => {
-      const device = RED.nodes.getNode(e.id) as NodeConfigType;
-      if (device && device.config?.service && device.config?.service === user.node_id) {
-        if (
-          !device.config?.access ||
-          device.config?.access === undefined ||
-          device.config?.access?.split(',').includes(String(user.login))
-        ) {
-          devices.push(device.device);
+  // route
+  const pong = (req: express.Request, res: express.Response) => res.sendStatus(200);
+  const unlink = (node: NodeServiceType) => {
+    return (req: express.Request, res: express.Response) => {
+      const cache: NanoCache = node.cache;
+      const token: string | undefined = req.get('Authorization')?.split(' ')[1];
+      const key: string = `${token}-${node.id}`;
+
+      if (cache.get(key)) {
+        cache.del(key);
+        return res.sendStatus(200);
+      }
+
+      return res.sendStatus(404);
+    };
+  };
+  const devices = (node: NodeServiceType) => {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const request_id: string | undefined = req.get('X-Request-Id');
+
+      const json: any = {
+        request_id: request_id,
+        payload: {
+          user_id: node.id,
+          devices: []
+        }
+      };
+
+      RED.nodes.eachNode(n => {
+        const device: NodeDeviceType = RED.nodes.getNode(n.id) as NodeDeviceType;
+        if (device?.device && device?.config?.service == node.id) {
+          json.payload.devices.push(device.device);
+        }
+      });
+
+      return res.json(json);
+    };
+  };
+  const query = (node: NodeServiceType) => {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const request_id: string | undefined = req.get('X-Request-Id');
+      const devices: any = req.body?.devices;
+
+      const json: any = {
+        request_id: request_id,
+        payload: {
+          user_id: node.id,
+          devices: []
+        }
+      };
+
+      devices.forEach((d: any) => {
+        const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
+        if (device?.device && device?.config?.service == node.id) {
+          json.payload.devices.push(device.device);
         } else {
-          devices.push({
-            id: e.id,
-            error_code: 'DEVICE_NOT_FOUND',
-            error_message: `device(${e.id}) not found or not access for user(${user.login})`
+          json.payload.devices.push({
+            id: d.id,
+            error_code: `DEVICE_NOT_FOUND`,
+            error_message: `device '${d.id})' not found`
           });
         }
-      }
-    });
-    return devices;
-  };
+      });
 
-  const _query = async (node: Node, req: express.Request, res: express.Response) => {
-    // console.log(req.route.path);
-    // TODO: write middleware for validate ...
-    const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-
-    if (request_id === undefined || token === undefined) {
-      res.sendStatus(401);
-      return;
-    }
-
-    // TODO: write middleware for auth ...
-    let user = (await Storage.getUserByToken(token)) as StorageUserType;
-    if (!user) {
-      try {
-        user = await Api.login(token);
-      } catch (error) {
-        RED.log.error(`fail authorization user (${error})`);
-        res.sendStatus(401);
-        return;
-      }
-    }
-    // TODO: MB change node.id (or empty) update User
-    if (user.node_id === undefined || user.node_id != node.id) {
-      await Storage.updateUser({...user, token, node_id: node.id} as StorageUserType);
-    }
-
-    if (req.body?.devices === undefined || req.body?.devices?.length === 0) {
-      res.sendStatus(404);
-      return;
-    }
-
-    let json = {
-      request_id: request_id,
-      payload: {
-        user_id: `${user.login}-${user.id}`,
-        devices: query(user, req.body.devices) as any
-      }
+      return res.json(json);
     };
-
-    res.status(200).json(json);
-    return;
   };
+  const action = (node: NodeServiceType) => {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const request_id: string | undefined = req.get('X-Request-Id');
+      const devices: any = req.body?.payload?.devices;
 
-  const action = (user: StorageUserType, id: any) => {
-    const devices: any = [];
-    id.forEach((e: any) => {
-      const device = RED.nodes.getNode(e.id) as NodeConfigType;
-      if (device && device.config?.service && device.config?.service === user.node_id) {
-        if (
-          !device.config?.access ||
-          device.config?.access === undefined ||
-          device.config?.access?.split(',').includes(String(user.login))
-        ) {
+      const json: any = {
+        request_id: request_id,
+        payload: {
+          user_id: node.id,
+          devices: []
+        }
+      };
+
+      devices.forEach((d: any) => {
+        const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
+        if (device?.device && device?.config?.service == node.id) {
           const capabilities: any = [];
-          e.capabilities.forEach((c: any) => {
+
+          d.capabilities.forEach((c: any) => {
+            // state device
             device.onState(c);
 
             capabilities.push({
@@ -180,106 +142,58 @@ module.exports = (RED: NodeAPI) => {
               }
             });
           });
-          devices.push({
-            id: e.id,
+
+          json.payload.devices.push({
+            id: d.id,
             capabilities: capabilities
           });
         } else {
-          devices.push({
-            id: e.id,
-            action_result: {
-              status: 'ERROR',
-              error_code: 'DEVICE_NOT_FOUND',
-              error_message: `device(${e.id}) not found or not access for user(${user.login})`
-            }
+          json.payload.devices.push({
+            id: d.id,
+            error_code: `DEVICE_NOT_FOUND`,
+            error_message: `device '${d.id})' not found`
           });
         }
-      }
-    });
-    return devices;
+      });
+
+      return res.json(json);
+    };
   };
 
-  const _action = async (node: Node, req: express.Request, res: express.Response) => {
-    // console.log(req.route.path);
-    // TODO: write middleware for validate ...
-    const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
+  const publish = function (self: NodeServiceType) {
+    const credentials: any = self.credentials;
+    const path: string = buildPath(credentials.path);
 
-    if (request_id === undefined || token === undefined) {
-      res.sendStatus(401);
-      return;
-    }
-
-    // TODO: write middleware for auth ...
-    let user = (await Storage.getUserByToken(token)) as StorageUserType;
-    if (!user) {
-      try {
-        user = await Api.login(token);
-      } catch (error) {
-        RED.log.error(`fail authorization user (${error})`);
-        res.sendStatus(401);
-        return;
-      }
-    }
-    // TODO: MB change node.id (or empty) update User
-    if (user.node_id === undefined || user.node_id != node.id) {
-      await Storage.updateUser({...user, token, node_id: node.id} as StorageUserType);
-    }
-
-    if (req.body?.payload?.devices === undefined || req.body?.payload?.devices?.length === 0) {
-      res.sendStatus(404);
-      return;
-    }
-
-    let json = {
-      request_id: request_id,
-      payload: {
-        user_id: `${user.login}-${user.id}`,
-        devices: action(user, req.body.payload.devices) as any
-      }
+    // https://yandex.ru/dev/dialogs/smart-home/doc/reference/resources.html#rest
+    const route: any = {
+      base: path,
+      pong: `${path}/v1.0/`,
+      unlink: `${path}/v1.0/user/unlink`,
+      devices: `${path}/v1.0/user/devices`,
+      query: `${path}/v1.0/user/devices/query`,
+      action: `${path}/v1.0/user/devices/action`,
+      // middleware
+      middleware: `${path}/v1.0/user/`
     };
 
-    res.status(200).json(json);
-    return;
+    // middleware
+    // RED.httpNode.use(route.base, _logMiddleware); // log
+    RED.httpNode.use(route.middleware, validatorMiddleware); // validatorMiddleware
+    RED.httpNode.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
+    // route
+    RED.httpNode.head(route.pong, pong);
+    RED.httpNode.post(route.unlink, unlink(self));
+    RED.httpNode.get(route.devices, devices(self));
+    RED.httpNode.post(route.query, query(self));
+    RED.httpNode.post(route.action, action(self));
   };
 
-  const buildPath = function (path: string): string {
-    return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
-  };
-
-  const publish = function (self: Node) {
+  const unpublish = function (self: NodeServiceType) {
     const credentials: any = self.credentials;
-    const path = buildPath(credentials.path);
+    const path: string = buildPath(credentials.path);
+    const pathRegexp: RegExp = new RegExp(`^${path}`, 'g');
 
-    // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
-    RED.httpNode.head(`${path}/v1.0/`, (req: express.Request, res: express.Response) => _pong(req, res));
-    // POST /v1.0/user/unlink         Оповещение о разъединении аккаунтов
-    RED.httpNode.post(
-      `${path}/v1.0/user/unlink`,
-      async (req: express.Request, res: express.Response) => await _unlink(req, res)
-    );
-    // GET  /v1.0/user/devices        Информация об устройствах пользователя
-    RED.httpNode.get(
-      `${path}/v1.0/user/devices`,
-      async (req: express.Request, res: express.Response) => await _devices(self, req, res)
-    );
-    // POST /v1.0/user/devices/query  Информация о состояниях устройств пользователя
-    RED.httpNode.post(
-      `${path}/v1.0/user/devices/query`,
-      async (req: express.Request, res: express.Response) => await _query(self, req, res)
-    );
-    // POST /v1.0/user/devices/action	Изменение состояния у устройств
-    RED.httpNode.post(
-      `${path}/v1.0/user/devices/action`,
-      async (req: express.Request, res: express.Response) => await _action(self, req, res)
-    );
-  };
-
-  const unpublish = function (self: Node) {
-    const credentials: any = self.credentials;
-    const path = buildPath(credentials.path);
-    const pathRegexp = new RegExp(`^${path}`, 'g');
-
-    for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
+    for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
       let route = RED.httpNode._router.stack[i];
       if (route.route && route.route.path.match(pathRegexp)) {
         // console.log(`${i} - delete - ${route.route.path}`);

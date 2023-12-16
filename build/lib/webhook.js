@@ -9,158 +9,128 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const storage_1 = require("./storage");
 const api_1 = require("./api");
 module.exports = (RED) => {
-    const _pong = (req, res) => {
-        // console.log(req.route.path);
-        res.sendStatus(200);
-        return;
+    // helper
+    const buildPath = function (path) {
+        return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
     };
-    const _unlink = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // middleware
+    const _logMiddleware = function (req, res, next) {
+        if (req.originalUrl) {
+            console.log(`${req.method} - ${req.originalUrl}`);
+        }
+        return next();
+    };
+    const validatorMiddleware = function (req, res, next) {
         var _a;
-        // console.log(req.route.path);
-        // TODO: write middleware for validate ...
         const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
-        if (request_id === undefined || token === undefined) {
-            res.sendStatus(401);
-            return;
-        }
-        const user = yield storage_1.Storage.getUserByToken(token);
-        if (user) {
-            // TODO: bad hack
-            try {
-                yield storage_1.Storage.removeUser(user);
-            }
-            catch (_) { }
-            res.sendStatus(200);
-            return;
-        }
-        res.sendStatus(404);
-        return;
-    });
-    const devices = (user) => {
-        const devices = [];
-        RED.nodes.eachNode(node => {
-            var _a, _b, _c, _d, _e, _f;
-            const device = RED.nodes.getNode(node.id);
-            if (device && ((_a = device.config) === null || _a === void 0 ? void 0 : _a.service) && ((_b = device.config) === null || _b === void 0 ? void 0 : _b.service) === user.node_id) {
-                if (!((_c = device.config) === null || _c === void 0 ? void 0 : _c.access) ||
-                    ((_d = device.config) === null || _d === void 0 ? void 0 : _d.access) === undefined ||
-                    ((_f = (_e = device.config) === null || _e === void 0 ? void 0 : _e.access) === null || _f === void 0 ? void 0 : _f.split(',').includes(String(user.login)))) {
-                    devices.push(device.device);
-                }
-            }
-        });
-        return devices;
+        if (request_id && token)
+            return next();
+        return res.sendStatus(404);
     };
-    const _devices = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _b;
-        // console.log(req.route.path);
-        // TODO: write middleware for validate ...
-        const [request_id, token] = [req.get('X-Request-Id'), (_b = req.get('Authorization')) === null || _b === void 0 ? void 0 : _b.split(' ')[1]];
-        if (request_id === undefined || token === undefined) {
-            res.sendStatus(401);
-            return;
-        }
-        // TODO: write middleware for auth ...
-        let user = (yield storage_1.Storage.getUserByToken(token));
-        if (!user) {
+    const authenticationMiddleware = (node) => {
+        return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a;
+            const cache = node.cache;
+            const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+            const key = `${token}-${node.id}`;
+            if (cache.get(key)) {
+                return next();
+            }
             try {
-                user = yield api_1.Api.login(token);
+                const user = yield api_1.Api.login(token);
+                cache.set(key, user);
             }
             catch (error) {
-                RED.log.error(`fail authorization user (${error})`);
-                res.sendStatus(401);
-                return;
+                return res.sendStatus(401);
             }
-        }
-        // TODO: MB change node.id (or empty) update User
-        if (user.node_id === undefined || user.node_id != node.id) {
-            yield storage_1.Storage.updateUser(Object.assign(Object.assign({}, user), { token, node_id: node.id }));
-        }
-        let json = {
-            request_id: request_id,
-            payload: {
-                user_id: `${user.login}-${user.id}`,
-                devices: devices(user)
+            return next();
+        });
+    };
+    // route
+    const pong = (req, res) => res.sendStatus(200);
+    const unlink = (node) => {
+        return (req, res) => {
+            var _a;
+            const cache = node.cache;
+            const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+            const key = `${token}-${node.id}`;
+            if (cache.get(key)) {
+                cache.del(key);
+                return res.sendStatus(200);
             }
+            return res.sendStatus(404);
         };
-        res.status(200).json(json);
-        return;
-    });
-    const query = (user, id) => {
-        const devices = [];
-        id.forEach((e) => {
-            var _a, _b, _c, _d, _e, _f;
-            const device = RED.nodes.getNode(e.id);
-            if (device && ((_a = device.config) === null || _a === void 0 ? void 0 : _a.service) && ((_b = device.config) === null || _b === void 0 ? void 0 : _b.service) === user.node_id) {
-                if (!((_c = device.config) === null || _c === void 0 ? void 0 : _c.access) ||
-                    ((_d = device.config) === null || _d === void 0 ? void 0 : _d.access) === undefined ||
-                    ((_f = (_e = device.config) === null || _e === void 0 ? void 0 : _e.access) === null || _f === void 0 ? void 0 : _f.split(',').includes(String(user.login)))) {
-                    devices.push(device.device);
+    };
+    const devices = (node) => {
+        return (req, res, next) => {
+            const request_id = req.get('X-Request-Id');
+            const json = {
+                request_id: request_id,
+                payload: {
+                    user_id: node.id,
+                    devices: []
+                }
+            };
+            RED.nodes.eachNode(n => {
+                var _a;
+                const device = RED.nodes.getNode(n.id);
+                if ((device === null || device === void 0 ? void 0 : device.device) && ((_a = device === null || device === void 0 ? void 0 : device.config) === null || _a === void 0 ? void 0 : _a.service) == node.id) {
+                    json.payload.devices.push(device.device);
+                }
+            });
+            return res.json(json);
+        };
+    };
+    const query = (node) => {
+        return (req, res, next) => {
+            var _a;
+            const request_id = req.get('X-Request-Id');
+            const devices = (_a = req.body) === null || _a === void 0 ? void 0 : _a.devices;
+            const json = {
+                request_id: request_id,
+                payload: {
+                    user_id: node.id,
+                    devices: []
+                }
+            };
+            devices.forEach((d) => {
+                var _a;
+                const device = RED.nodes.getNode(d.id);
+                if ((device === null || device === void 0 ? void 0 : device.device) && ((_a = device === null || device === void 0 ? void 0 : device.config) === null || _a === void 0 ? void 0 : _a.service) == node.id) {
+                    json.payload.devices.push(device.device);
                 }
                 else {
-                    devices.push({
-                        id: e.id,
-                        error_code: 'DEVICE_NOT_FOUND',
-                        error_message: `device(${e.id}) not found or not access for user(${user.login})`
+                    json.payload.devices.push({
+                        id: d.id,
+                        error_code: `DEVICE_NOT_FOUND`,
+                        error_message: `device '${d.id})' not found`
                     });
                 }
-            }
-        });
-        return devices;
-    };
-    const _query = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _c, _d, _e, _f;
-        // console.log(req.route.path);
-        // TODO: write middleware for validate ...
-        const [request_id, token] = [req.get('X-Request-Id'), (_c = req.get('Authorization')) === null || _c === void 0 ? void 0 : _c.split(' ')[1]];
-        if (request_id === undefined || token === undefined) {
-            res.sendStatus(401);
-            return;
-        }
-        // TODO: write middleware for auth ...
-        let user = (yield storage_1.Storage.getUserByToken(token));
-        if (!user) {
-            try {
-                user = yield api_1.Api.login(token);
-            }
-            catch (error) {
-                RED.log.error(`fail authorization user (${error})`);
-                res.sendStatus(401);
-                return;
-            }
-        }
-        // TODO: MB change node.id (or empty) update User
-        if (user.node_id === undefined || user.node_id != node.id) {
-            yield storage_1.Storage.updateUser(Object.assign(Object.assign({}, user), { token, node_id: node.id }));
-        }
-        if (((_d = req.body) === null || _d === void 0 ? void 0 : _d.devices) === undefined || ((_f = (_e = req.body) === null || _e === void 0 ? void 0 : _e.devices) === null || _f === void 0 ? void 0 : _f.length) === 0) {
-            res.sendStatus(404);
-            return;
-        }
-        let json = {
-            request_id: request_id,
-            payload: {
-                user_id: `${user.login}-${user.id}`,
-                devices: query(user, req.body.devices)
-            }
+            });
+            return res.json(json);
         };
-        res.status(200).json(json);
-        return;
-    });
-    const action = (user, id) => {
-        const devices = [];
-        id.forEach((e) => {
-            var _a, _b, _c, _d, _e, _f;
-            const device = RED.nodes.getNode(e.id);
-            if (device && ((_a = device.config) === null || _a === void 0 ? void 0 : _a.service) && ((_b = device.config) === null || _b === void 0 ? void 0 : _b.service) === user.node_id) {
-                if (!((_c = device.config) === null || _c === void 0 ? void 0 : _c.access) ||
-                    ((_d = device.config) === null || _d === void 0 ? void 0 : _d.access) === undefined ||
-                    ((_f = (_e = device.config) === null || _e === void 0 ? void 0 : _e.access) === null || _f === void 0 ? void 0 : _f.split(',').includes(String(user.login)))) {
+    };
+    const action = (node) => {
+        return (req, res, next) => {
+            var _a, _b;
+            const request_id = req.get('X-Request-Id');
+            const devices = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.devices;
+            const json = {
+                request_id: request_id,
+                payload: {
+                    user_id: node.id,
+                    devices: []
+                }
+            };
+            devices.forEach((d) => {
+                var _a;
+                const device = RED.nodes.getNode(d.id);
+                if ((device === null || device === void 0 ? void 0 : device.device) && ((_a = device === null || device === void 0 ? void 0 : device.config) === null || _a === void 0 ? void 0 : _a.service) == node.id) {
                     const capabilities = [];
-                    e.capabilities.forEach((c) => {
+                    d.capabilities.forEach((c) => {
+                        // state device
                         device.onState(c);
                         capabilities.push({
                             type: c.type,
@@ -172,86 +142,52 @@ module.exports = (RED) => {
                             }
                         });
                     });
-                    devices.push({
-                        id: e.id,
+                    json.payload.devices.push({
+                        id: d.id,
                         capabilities: capabilities
                     });
                 }
                 else {
-                    devices.push({
-                        id: e.id,
-                        action_result: {
-                            status: 'ERROR',
-                            error_code: 'DEVICE_NOT_FOUND',
-                            error_message: `device(${e.id}) not found or not access for user(${user.login})`
-                        }
+                    json.payload.devices.push({
+                        id: d.id,
+                        error_code: `DEVICE_NOT_FOUND`,
+                        error_message: `device '${d.id})' not found`
                     });
                 }
-            }
-        });
-        return devices;
-    };
-    const _action = (node, req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _g, _h, _j, _k, _l, _m;
-        // console.log(req.route.path);
-        // TODO: write middleware for validate ...
-        const [request_id, token] = [req.get('X-Request-Id'), (_g = req.get('Authorization')) === null || _g === void 0 ? void 0 : _g.split(' ')[1]];
-        if (request_id === undefined || token === undefined) {
-            res.sendStatus(401);
-            return;
-        }
-        // TODO: write middleware for auth ...
-        let user = (yield storage_1.Storage.getUserByToken(token));
-        if (!user) {
-            try {
-                user = yield api_1.Api.login(token);
-            }
-            catch (error) {
-                RED.log.error(`fail authorization user (${error})`);
-                res.sendStatus(401);
-                return;
-            }
-        }
-        // TODO: MB change node.id (or empty) update User
-        if (user.node_id === undefined || user.node_id != node.id) {
-            yield storage_1.Storage.updateUser(Object.assign(Object.assign({}, user), { token, node_id: node.id }));
-        }
-        if (((_j = (_h = req.body) === null || _h === void 0 ? void 0 : _h.payload) === null || _j === void 0 ? void 0 : _j.devices) === undefined || ((_m = (_l = (_k = req.body) === null || _k === void 0 ? void 0 : _k.payload) === null || _l === void 0 ? void 0 : _l.devices) === null || _m === void 0 ? void 0 : _m.length) === 0) {
-            res.sendStatus(404);
-            return;
-        }
-        let json = {
-            request_id: request_id,
-            payload: {
-                user_id: `${user.login}-${user.id}`,
-                devices: action(user, req.body.payload.devices)
-            }
+            });
+            return res.json(json);
         };
-        res.status(200).json(json);
-        return;
-    });
-    const buildPath = function (path) {
-        return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
     };
     const publish = function (self) {
         const credentials = self.credentials;
         const path = buildPath(credentials.path);
-        // HEAD /v1.0/                    Проверка доступности Endpoint URL провайдера
-        RED.httpNode.head(`${path}/v1.0/`, (req, res) => _pong(req, res));
-        // POST /v1.0/user/unlink         Оповещение о разъединении аккаунтов
-        RED.httpNode.post(`${path}/v1.0/user/unlink`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _unlink(req, res); }));
-        // GET  /v1.0/user/devices        Информация об устройствах пользователя
-        RED.httpNode.get(`${path}/v1.0/user/devices`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _devices(self, req, res); }));
-        // POST /v1.0/user/devices/query  Информация о состояниях устройств пользователя
-        RED.httpNode.post(`${path}/v1.0/user/devices/query`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _query(self, req, res); }));
-        // POST /v1.0/user/devices/action	Изменение состояния у устройств
-        RED.httpNode.post(`${path}/v1.0/user/devices/action`, (req, res) => __awaiter(this, void 0, void 0, function* () { return yield _action(self, req, res); }));
+        // https://yandex.ru/dev/dialogs/smart-home/doc/reference/resources.html#rest
+        const route = {
+            base: path,
+            pong: `${path}/v1.0/`,
+            unlink: `${path}/v1.0/user/unlink`,
+            devices: `${path}/v1.0/user/devices`,
+            query: `${path}/v1.0/user/devices/query`,
+            action: `${path}/v1.0/user/devices/action`,
+            // middleware
+            middleware: `${path}/v1.0/user/`
+        };
+        // middleware
+        // RED.httpNode.use(route.base, _logMiddleware); // log
+        RED.httpNode.use(route.middleware, validatorMiddleware); // validatorMiddleware
+        RED.httpNode.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
+        // route
+        RED.httpNode.head(route.pong, pong);
+        RED.httpNode.post(route.unlink, unlink(self));
+        RED.httpNode.get(route.devices, devices(self));
+        RED.httpNode.post(route.query, query(self));
+        RED.httpNode.post(route.action, action(self));
     };
     const unpublish = function (self) {
         const credentials = self.credentials;
         const path = buildPath(credentials.path);
         const pathRegexp = new RegExp(`^${path}`, 'g');
-        for (var i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
+        for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
             let route = RED.httpNode._router.stack[i];
             if (route.route && route.route.path.match(pathRegexp)) {
                 // console.log(`${i} - delete - ${route.route.path}`);
