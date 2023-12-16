@@ -7,7 +7,6 @@
       description: {value: ''},
       room: {value: 'Туалет', required: true},
       dtype: {value: 'devices.types.light', required: true},
-      access: {value: undefined},
     },
     paletteLabel: 'device',
     label: function () {
@@ -35,11 +34,6 @@
   <div class="form-row">
     <label for="node-config-input-room"><i class="fa fa-bath"></i> Room</label>
     <input type="text" id="node-config-input-room" placeholder="Room" />
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-access"><i class="fa fa-users"></i> Access</label>
-    <input type="text" id="node-config-input-access" placeholder="Access" />
   </div>
 
   <div class="form-row">
@@ -85,10 +79,4 @@
 </script>
 
 <script type="text/html" data-help-name="alice-sh-device">
-  <p>Yandex Device for Alice</p>
-  <h3>Configuration</h3>
-  <dl class="message-properties">
-    <dt class="required">Access<span class="property-type">string</span></dt>
-    <dd>Login from LOGIN@ya.ru, separator ',' only this login will see device</dd>
-  </dl>
 </script>

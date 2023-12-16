@@ -1,6 +1,6 @@
 import {NodeAPI, Node} from 'node-red';
 import express from 'express';
-import {NodeServiceType, NodeDeviceType, StorageUserType} from './types';
+import {NodeServiceType, NodeDeviceType} from './types';
 import {Api} from './api';
 import NanoCache from 'nano-cache';
 

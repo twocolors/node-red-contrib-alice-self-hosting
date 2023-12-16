@@ -1,5 +1,5 @@
-import axios from 'axios';
-import {StorageUserType} from './types';
+import axios, {AxiosError} from 'axios';
+import {NodeServiceType} from './types';
 
 export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/id/doc/ru/user-information
@@ -17,26 +17,32 @@ export const Api: {[key: string]: any} = {
       try {
         const response = await axios.request(_options);
         resolve(response.data);
-      } catch (error) {
-        reject(error);
+      } catch (error: any) {
+        let msg = `${error.response.status} - ${error.response.statusText}`;
+        if (error.response?.data && typeof error.response?.data === 'object') {
+          msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+        }
+        reject(msg);
       }
     });
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
-  callback_state: async (skill_id: string, oauth_token: string, user: StorageUserType, device: any) => {
+  callback_state: (service: NodeServiceType, device: any) => {
+    const credentials: any = service.credentials;
+
     return new Promise(async (resolve, reject) => {
       const _options = {
         method: 'POST',
         timeout: 1500,
-        url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/state`,
+        url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
         headers: {
           'content-type': 'application/json',
-          Authorization: `OAuth ${oauth_token}`
+          Authorization: `OAuth ${credentials.oauth_token}`
         },
         data: {
           ts: Math.floor(Date.now() / 1000),
           payload: {
-            user_id: `${user.login}-${user.id}`,
+            user_id: service.id,
             devices: [device]
           }
         }
@@ -45,26 +51,32 @@ export const Api: {[key: string]: any} = {
       try {
         const response = await axios.request(_options);
         resolve(response.data);
-      } catch (error) {
-        reject(error);
+      } catch (error: any) {
+        let msg = `${error.response.status} - ${error.response.statusText}`;
+        if (error.response?.data && typeof error.response?.data === 'object') {
+          msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+        }
+        reject(msg);
       }
     });
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
-  callback_discovery: async (skill_id: string, oauth_token: string, user: StorageUserType) => {
+  callback_discovery: (service: NodeServiceType) => {
+    const credentials: any = service.credentials;
+
     return new Promise(async (resolve, reject) => {
       const _options = {
         method: 'POST',
         timeout: 1500,
-        url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/discovery`,
+        url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
         headers: {
           'content-type': 'application/json',
-          Authorization: `OAuth ${oauth_token}`
+          Authorization: `OAuth ${credentials.oauth_token}`
         },
         data: {
           ts: Math.floor(Date.now() / 1000),
           payload: {
-            user_id: `${user.login}-${user.id}`
+            user_id: service.id
           }
         }
       };
@@ -72,8 +84,12 @@ export const Api: {[key: string]: any} = {
       try {
         const response = await axios.request(_options);
         resolve(response.data);
-      } catch (error) {
-        reject(error);
+      } catch (error: any) {
+        let msg = `${error.response.status} - ${error.response.statusText}`;
+        if (error.response?.data && typeof error.response?.data === 'object') {
+          msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+        }
+        reject(msg);
       }
     });
   }

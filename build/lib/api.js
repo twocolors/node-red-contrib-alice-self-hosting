@@ -18,6 +18,7 @@ exports.Api = {
     // https://yandex.ru/dev/id/doc/ru/user-information
     login: (token) => __awaiter(void 0, void 0, void 0, function* () {
         return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a, _b;
             const _options = {
                 method: 'GET',
                 timeout: 1500,
@@ -31,25 +32,31 @@ exports.Api = {
                 resolve(response.data);
             }
             catch (error) {
-                reject(error);
+                let msg = `${error.response.status} - ${error.response.statusText}`;
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) && typeof ((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === 'object') {
+                    msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+                }
+                reject(msg);
             }
         }));
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
-    callback_state: (skill_id, oauth_token, user, device) => __awaiter(void 0, void 0, void 0, function* () {
+    callback_state: (service, device) => {
+        const credentials = service.credentials;
         return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a, _b;
             const _options = {
                 method: 'POST',
                 timeout: 1500,
-                url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/state`,
+                url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
                 headers: {
                     'content-type': 'application/json',
-                    Authorization: `OAuth ${oauth_token}`
+                    Authorization: `OAuth ${credentials.oauth_token}`
                 },
                 data: {
                     ts: Math.floor(Date.now() / 1000),
                     payload: {
-                        user_id: `${user.login}-${user.id}`,
+                        user_id: service.id,
                         devices: [device]
                     }
                 }
@@ -59,25 +66,31 @@ exports.Api = {
                 resolve(response.data);
             }
             catch (error) {
-                reject(error);
+                let msg = `${error.response.status} - ${error.response.statusText}`;
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) && typeof ((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === 'object') {
+                    msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+                }
+                reject(msg);
             }
         }));
-    }),
+    },
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
-    callback_discovery: (skill_id, oauth_token, user) => __awaiter(void 0, void 0, void 0, function* () {
+    callback_discovery: (service) => {
+        const credentials = service.credentials;
         return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
+            var _a, _b;
             const _options = {
                 method: 'POST',
                 timeout: 1500,
-                url: `https://dialogs.yandex.net/api/v1/skills/${skill_id}/callback/discovery`,
+                url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
                 headers: {
                     'content-type': 'application/json',
-                    Authorization: `OAuth ${oauth_token}`
+                    Authorization: `OAuth ${credentials.oauth_token}`
                 },
                 data: {
                     ts: Math.floor(Date.now() / 1000),
                     payload: {
-                        user_id: `${user.login}-${user.id}`
+                        user_id: service.id
                     }
                 }
             };
@@ -86,9 +99,13 @@ exports.Api = {
                 resolve(response.data);
             }
             catch (error) {
-                reject(error);
+                let msg = `${error.response.status} - ${error.response.statusText}`;
+                if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) && typeof ((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === 'object') {
+                    msg = `${error.response.data.error_code} - ${error.response.data.error_message}`;
+                }
+                reject(msg);
             }
         }));
-    })
+    }
 };
 //# sourceMappingURL=api.js.map

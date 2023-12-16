@@ -1,11 +1,10 @@
 import {NodeAPI, runtime} from 'node-red';
-import {Storage} from '../lib/storage';
-import {StorageUserType} from '../lib/types';
 import {Api} from '../lib/api';
-import {AxiosError} from 'axios';
-import {inspect} from 'util';
+import {NodeServiceType} from '../lib/types';
 
 module.exports = (RED: NodeAPI) => {
+  const version: string = require('../../package.json').version.trim();
+
   RED.nodes.registerType('alice-sh-device', function (this: any, config: any) {
     const self = this;
     self.config = config;
@@ -14,37 +13,32 @@ module.exports = (RED: NodeAPI) => {
     self.setMaxListeners(0);
 
     // var
-    const name = config.name;
-    const service = RED.nodes.getNode(config.service) as any;
-    const description = config.description;
-    const room = config.room;
-    const dtype = config.dtype;
-    const access = config.access;
+    self.service = RED.nodes.getNode(config.service) as NodeServiceType;
+    self.cache = self.service.cache;
 
-    // bad hack for storage
-    self.storage = {};
-
-    // device
+    // device init
     self.device = {
       id: self.id,
-      name: name,
-      description: description,
-      room: room,
-      type: dtype,
+      name: config.name,
+      description: config.description,
+      room: config.room,
+      type: config.dtype,
       device_info: {
         manufacturer: 'Node-RED',
         model: 'virtual device',
-        sw_version: 'test v1'
+        sw_version: version,
       },
       capabilities: [],
       properties: []
     };
 
+    // emit to state
     self.onState = function (object: any) {
       self.emit('onState', object);
     };
 
-    // help
+    // helper
+    // https://github.com/lasthead0/yandex2mqtt/blob/master/device.js#L4
     function convertToYandexValue(val: any, actType: string) {
       switch (actType) {
         case 'range':
@@ -133,89 +127,15 @@ module.exports = (RED: NodeAPI) => {
         const actType = String(cp.type).split('.')[2];
         const value = convertToYandexValue(val, actType);
         cp.state = {instance, value: value};
-
-        // save to storage
-        self.storage[`${type}-${instance}`] = value;
       } catch (_) {}
     };
 
     // state device
-    self.updateStateDevice = async function () {
-      const node_id = service.id;
-      const skill_id = service.credentials?.skill_id;
-      const oauth_token = service.credentials?.oauth_token;
-      const device = self.device;
-
-      if (!skill_id) {
-        throw new Error(`Parameters 'skill_id' is not set in parents`);
-      }
-
-      if (!oauth_token) {
-        throw new Error(`Parameters 'oauth_token' is not set in parents`);
-      }
-
-      const users = await Storage.getUsersByNodeId(node_id);
-      if (users?.length === 0) {
-        return;
-      }
-
-      await users.forEach(async (u: StorageUserType) => {
-        if (!access || access === undefined || access.split(',').includes(String(u.login))) {
-          try {
-            await Api.callback_state(skill_id, oauth_token, u, device);
-          } catch (error) {
-            const _error = error as AxiosError;
-            const status = _error.response?.status;
-            let text = _error.response?.data;
-            if (typeof text === 'object') {
-              text = inspect(text);
-            }
-            if (typeof text === 'string') {
-              text = text.replace(/^\n+|\n+$/g, '');
-            }
-            self.error(`updateStateDevice(${u.login}): ${status} - ${text}`);
-          }
-        }
-      });
-    };
+    self.updateStateDevice = () => Api.callback_state(self.service, self.device);
+    self.asyncUpdateStateDevice = () => Api.callback_state(self.service, self.device).catch(() => {});
 
     // info device
-    self.updateInfoDevice = async function () {
-      const node_id = service.id;
-      const skill_id = service.credentials?.skill_id;
-      const oauth_token = service.credentials?.oauth_token;
-
-      if (!skill_id) {
-        throw new Error(`Parameters 'skill_id' is not set in parents`);
-      }
-
-      if (!oauth_token) {
-        throw new Error(`Parameters 'oauth_token' is not set in parents`);
-      }
-
-      const users = await Storage.getUsersByNodeId(node_id);
-      if (users?.length === 0) {
-        return;
-      }
-
-      await users.forEach(async (u: StorageUserType) => {
-        if (!access || access === undefined || access.split(',').includes(String(u.login))) {
-          try {
-            await Api.callback_discovery(skill_id, oauth_token, u);
-          } catch (error) {
-            const _error = error as AxiosError;
-            const status = _error.response?.status;
-            let text = _error.response?.data;
-            if (typeof text === 'object') {
-              text = inspect(text);
-            }
-            if (typeof text === 'string') {
-              text = text.replace(/^\n+|\n+$/g, '');
-            }
-            self.error(`updateInfoDevice(${u.login}): ${status} - ${text}`);
-          }
-        }
-      });
-    };
+    self.updateInfoDevice = () => Api.callback_discovery(self.service);
+    self.asyncUpdateInfoDevice = () => Api.callback_discovery(self.service).catch(() => {});
   });
 };
