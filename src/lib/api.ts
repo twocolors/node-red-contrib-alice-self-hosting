@@ -9,7 +9,8 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 3,
       retryDelay: retryCount => retryCount * 75,
-      retryCondition: isRetryableError
+      retryCondition: isRetryableError,
+      shouldResetTimeout: true
     });
 
     const _options = {
@@ -40,7 +41,8 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 10,
       retryDelay: retryCount => retryCount * 75,
-      retryCondition: isRetryableError
+      retryCondition: isRetryableError,
+      shouldResetTimeout: true
     });
 
     const _options = {
@@ -79,7 +81,8 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 10,
       retryDelay: retryCount => retryCount * 75,
-      retryCondition: isRetryableError
+      retryCondition: isRetryableError,
+      shouldResetTimeout: true
     });
 
     const _options = {

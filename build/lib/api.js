@@ -46,7 +46,8 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 3,
             retryDelay: retryCount => retryCount * 75,
-            retryCondition: axios_retry_1.isRetryableError
+            retryCondition: axios_retry_1.isRetryableError,
+            shouldResetTimeout: true
         });
         const _options = {
             method: 'GET',
@@ -76,7 +77,8 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 10,
             retryDelay: retryCount => retryCount * 75,
-            retryCondition: axios_retry_1.isRetryableError
+            retryCondition: axios_retry_1.isRetryableError,
+            shouldResetTimeout: true
         });
         const _options = {
             method: 'POST',
@@ -113,7 +115,8 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 10,
             retryDelay: retryCount => retryCount * 75,
-            retryCondition: axios_retry_1.isRetryableError
+            retryCondition: axios_retry_1.isRetryableError,
+            shouldResetTimeout: true
         });
         const _options = {
             method: 'POST',
