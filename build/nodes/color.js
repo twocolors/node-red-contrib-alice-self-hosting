@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const status_1 = require("../lib/status");
 const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-color', function (config) {
@@ -28,39 +29,15 @@ module.exports = (RED) => {
         const temperature_max = parseInt(config.temperature_max);
         const color_scene = config.color_scene || [];
         // helpers
-        const clearStatus = (timeout = 0) => {
-            setTimeout(() => {
-                self.status({});
-            }, timeout);
-        };
-        const setStatus = (status, timeout = 0) => {
-            self.status(status);
-            if (timeout) {
-                clearStatus(timeout);
-            }
-        };
-        const _updateStateDevice = () => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield device.updateStateDevice();
-            }
-            catch (error) {
-                self.error(error);
-                setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
-            }
-        });
-        const _updateInfoDevice = () => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield device.updateInfoDevice();
-            }
-            catch (error) {
-                self.error(error);
-                setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
-            }
-        });
+        self.statusHelper = new status_1.Status(self);
         if (!color_support && !temperature_k && color_scene.length < 1) {
-            const text = `Error on create capability: At least one parameter must be enabled`;
-            self.error(text);
-            setStatus({ fill: 'red', shape: 'dot', text: text }, 5000);
+            const error = `Least one parameter must be enabled`;
+            self.error(error);
+            self.statusHelper.set({
+                fill: 'red',
+                shape: 'dot',
+                text: error
+            });
             return;
         }
         // device not init
@@ -85,19 +62,20 @@ module.exports = (RED) => {
         }
         if (color_scene.length > 0) {
             instance = 'scene';
-            let scenes = [];
+            const scenes = [];
             color_scene.forEach((s) => {
                 scenes.push({ id: s });
             });
             parameters.color_scene = {
                 scenes: scenes
             };
-            value = 'alice';
+            value = color_scene[0];
         }
-        value = device.storage[`${ctype}-${instance}`] || value;
+        const keyCache = `${self.id}-${ctype}-${instance}`;
+        value = device.cache.get(keyCache) || value;
         // init
         try {
-            setStatus({});
+            self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
                 reportable: reportable,
@@ -111,39 +89,72 @@ module.exports = (RED) => {
         }
         catch (error) {
             self.error(error);
-            setStatus({
+            self.statusHelper.set({
                 fill: 'red',
                 shape: 'dot',
                 text: error
             });
             return;
         }
-        _updateInfoDevice();
+        device.updateInfoDevice().catch((error) => {
+            self.error(`updateInfoDevice: ${error}`);
+            self.statusHelper.set({
+                fill: 'red',
+                shape: 'dot',
+                text: error
+            }, 5000);
+        });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
             const payload = msg.payload;
+            if (typeof payload != 'object' && typeof payload != 'number' && typeof payload != 'string') {
+                self.statusHelper.set({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: `Wrong type! msg.payload type is unsupported`
+                }, 3000);
+                return;
+            }
             if (value == payload)
                 return;
-            value = payload;
-            let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : (0, util_1.inspect)(payload);
+            let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);
             if (text && text.length > 32) {
-                text = text.substr(0, 32) + '...';
+                text = `${text.substring(0, 32)}...`;
             }
-            setStatus({ fill: 'yellow', shape: 'dot', text: text }, 3000);
+            self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: text }, 3000);
             device.updateState(payload, ctype, instance);
-            yield _updateStateDevice();
+            try {
+                yield device.updateStateDevice();
+                value = payload;
+                device.cache.set(keyCache, value);
+                self.statusHelper.set({
+                    fill: 'blue',
+                    shape: 'ring',
+                    text: 'Ok'
+                }, 3000);
+            }
+            catch (error) {
+                device.updateState(value, ctype, instance);
+                self.error(`updateStateDevice: ${error}`);
+                self.statusHelper.set({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: error
+                }, 5000);
+            }
         }));
         const onState = (object) => {
             var _a, _b, _c;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
                 value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
                 device.updateState(value, ctype, instance);
+                device.cache.set(keyCache, value);
                 self.send({
                     payload: value,
                     type: object === null || object === void 0 ? void 0 : object.type,
                     instance: (_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.instance
                 });
                 if (reportable) {
-                    _updateStateDevice();
+                    device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
                 }
             }
         };
@@ -151,9 +162,15 @@ module.exports = (RED) => {
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeCapability(ctype, instance);
             if (removed) {
-                device.storage[`${ctype}-${instance}`] = undefined;
-                yield _updateInfoDevice();
-                yield _updateStateDevice();
+                device.cache.del(keyCache);
+                try {
+                    yield device.updateInfoDevice();
+                }
+                catch (_) { }
+                try {
+                    yield device.updateStateDevice();
+                }
+                catch (_) { }
             }
             device.removeListener('onState', onState);
             done();
