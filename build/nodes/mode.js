@@ -90,11 +90,11 @@ module.exports = (RED) => {
                 }, 3000);
                 return;
             }
-            if (modes.indexOf(payload) < 0) {
+            if (!modes.includes(payload)) {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
-                    text: `Unsupported command`
+                    text: `Unsupported command, msg.payload must be from the list of allowed modes`
                 }, 3000);
                 return;
             }
