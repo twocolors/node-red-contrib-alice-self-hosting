@@ -1,4 +1,6 @@
 import {NodeAPI} from 'node-red';
+import {NodeDeviceType} from '../lib/types';
+import {Status} from '../lib/status';
 import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
@@ -10,53 +12,25 @@ module.exports = (RED: NodeAPI) => {
 
     // var
     const name = config.name;
-    const device = RED.nodes.getNode(config.device) as any;
+    const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ptype = config.ptype;
     const instance = config.instance;
     const unit = config.unit;
     const retrievable = true;
-    const reportable = true;
+    const reportable = true; // reportable = response
 
     // helpers
-    const clearStatus = (timeout = 0) => {
-      setTimeout(() => {
-        self.status({});
-      }, timeout);
-    };
-
-    const setStatus = (status: any, timeout = 0) => {
-      self.status(status);
-      if (timeout) {
-        clearStatus(timeout);
-      }
-    };
-
-    const _updateStateDevice = async () => {
-      try {
-        await device.updateStateDevice();
-      } catch (error) {
-        self.error(error);
-        setStatus({fill: 'red', shape: 'dot', text: error}, 5000);
-      }
-    };
-
-    const _updateInfoDevice = async () => {
-      try {
-        await device.updateInfoDevice();
-      } catch (error) {
-        self.error(error);
-        setStatus({fill: 'red', shape: 'dot', text: error}, 5000);
-      }
-    };
+    self.statusHelper = new Status(self);
 
     // device not init
     if (!device) return;
     // init
-    let value = device.storage[`${ptype}-${instance}`] || Number(0.0);
+    const keyCache = `${self.id}-${ptype}-${instance}`;
+    let value = device.cache.get(keyCache) || Number(0.0);
 
     // init
     try {
-      setStatus({});
+      self.statusHelper.clear();
 
       device.setProperty(
         {
@@ -77,7 +51,7 @@ module.exports = (RED: NodeAPI) => {
       );
     } catch (error) {
       self.error(error);
-      setStatus({
+      self.statusHelper.set({
         fill: 'red',
         shape: 'dot',
         text: error
@@ -85,30 +59,81 @@ module.exports = (RED: NodeAPI) => {
       return;
     }
 
-    _updateInfoDevice();
+    device.updateInfoDevice().catch((error: any) => {
+      self.error(`updateInfoDevice: ${error}`);
+      self.statusHelper.set(
+        {
+          fill: 'red',
+          shape: 'dot',
+          text: error
+        },
+        5000
+      );
+    });
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
       const payload: any = msg.payload;
-      if (value == payload) return;
-      value = payload;
-
-      let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : inspect(payload);
-      if (text && text.length > 32) {
-        text = text.substr(0, 32) + '...';
+      if (typeof payload != 'number') {
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: `Wrong type! msg.payload must be number`
+          },
+          3000
+        );
+        return;
       }
-      setStatus({fill: 'yellow', shape: 'dot', text: text}, 3000);
+
+      if (value == payload) return;
+
+      let text: string = payload && typeof payload !== 'object' ? String(payload) : inspect(payload);
+      if (text && text.length > 32) {
+        text = `${text.substring(0, 32)}...`;
+      }
+      self.statusHelper.set({fill: 'yellow', shape: 'dot', text: text}, 3000);
 
       device.updateState(payload, ptype, instance);
 
-      await _updateStateDevice();
+      try {
+        await device.updateStateDevice();
+
+        value = payload;
+        device.cache.set(keyCache, value);
+
+        self.statusHelper.set(
+          {
+            fill: 'blue',
+            shape: 'ring',
+            text: 'Ok'
+          },
+          3000
+        );
+      } catch (error: any) {
+        device.updateState(value, ptype, instance);
+
+        self.error(`updateStateDevice: ${error}`);
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: error
+          },
+          5000
+        );
+      }
     });
 
     self.on('close', async (removed: boolean, done: any) => {
       device.removeProperty(ptype, instance);
       if (removed) {
-        device.storage[`${ptype}-${instance}`] = undefined;
-        await _updateInfoDevice();
-        await _updateStateDevice();
+        device.cache.del(keyCache);
+        try {
+          await device.updateInfoDevice();
+        } catch (_) {}
+        try {
+          await device.updateStateDevice();
+        } catch (_) {}
       }
       done();
     });

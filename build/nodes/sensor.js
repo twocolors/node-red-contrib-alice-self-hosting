@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const status_1 = require("../lib/status");
 const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-sensor', function (config) {
@@ -22,45 +23,18 @@ module.exports = (RED) => {
         const instance = config.instance;
         const unit = config.unit;
         const retrievable = true;
-        const reportable = true;
+        const reportable = true; // reportable = response
         // helpers
-        const clearStatus = (timeout = 0) => {
-            setTimeout(() => {
-                self.status({});
-            }, timeout);
-        };
-        const setStatus = (status, timeout = 0) => {
-            self.status(status);
-            if (timeout) {
-                clearStatus(timeout);
-            }
-        };
-        const _updateStateDevice = () => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield device.updateStateDevice();
-            }
-            catch (error) {
-                self.error(error);
-                setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
-            }
-        });
-        const _updateInfoDevice = () => __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield device.updateInfoDevice();
-            }
-            catch (error) {
-                self.error(error);
-                setStatus({ fill: 'red', shape: 'dot', text: error }, 5000);
-            }
-        });
+        self.statusHelper = new status_1.Status(self);
         // device not init
         if (!device)
             return;
         // init
-        let value = device.storage[`${ptype}-${instance}`] || Number(0.0);
+        const keyCache = `${self.id}-${ptype}-${instance}`;
+        let value = device.cache.get(keyCache) || Number(0.0);
         // init
         try {
-            setStatus({});
+            self.statusHelper.clear();
             device.setProperty({
                 type: ptype,
                 reportable: reportable,
@@ -77,33 +51,71 @@ module.exports = (RED) => {
         }
         catch (error) {
             self.error(error);
-            setStatus({
+            self.statusHelper.set({
                 fill: 'red',
                 shape: 'dot',
                 text: error
             });
             return;
         }
-        _updateInfoDevice();
+        device.updateInfoDevice().catch((error) => {
+            self.error(`updateInfoDevice: ${error}`);
+            self.statusHelper.set({
+                fill: 'red',
+                shape: 'dot',
+                text: error
+            }, 5000);
+        });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
             const payload = msg.payload;
+            if (typeof payload != 'number') {
+                self.statusHelper.set({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: `Wrong type! msg.payload must be number`
+                }, 3000);
+                return;
+            }
             if (value == payload)
                 return;
-            value = payload;
-            let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : (0, util_1.inspect)(payload);
+            let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);
             if (text && text.length > 32) {
-                text = text.substr(0, 32) + '...';
+                text = `${text.substring(0, 32)}...`;
             }
-            setStatus({ fill: 'yellow', shape: 'dot', text: text }, 3000);
+            self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: text }, 3000);
             device.updateState(payload, ptype, instance);
-            yield _updateStateDevice();
+            try {
+                yield device.updateStateDevice();
+                value = payload;
+                device.cache.set(keyCache, value);
+                self.statusHelper.set({
+                    fill: 'blue',
+                    shape: 'ring',
+                    text: 'Ok'
+                }, 3000);
+            }
+            catch (error) {
+                device.updateState(value, ptype, instance);
+                self.error(`updateStateDevice: ${error}`);
+                self.statusHelper.set({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: error
+                }, 5000);
+            }
         }));
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeProperty(ptype, instance);
             if (removed) {
-                device.storage[`${ptype}-${instance}`] = undefined;
-                yield _updateInfoDevice();
-                yield _updateStateDevice();
+                device.cache.del(keyCache);
+                try {
+                    yield device.updateInfoDevice();
+                }
+                catch (_) { }
+                try {
+                    yield device.updateStateDevice();
+                }
+                catch (_) { }
             }
             done();
         }));
