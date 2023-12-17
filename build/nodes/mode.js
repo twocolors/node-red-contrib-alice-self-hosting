@@ -81,8 +81,7 @@ module.exports = (RED) => {
             }, 5000);
         });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
-            const payload = msg.payload;
-            if (typeof payload != 'string') {
+            if (typeof msg.payload !== 'string') {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
@@ -90,7 +89,7 @@ module.exports = (RED) => {
                 }, 3000);
                 return;
             }
-            if (!modes.includes(payload)) {
+            if (!modes.includes(msg.payload)) {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
@@ -98,6 +97,7 @@ module.exports = (RED) => {
                 }, 3000);
                 return;
             }
+            const payload = String(msg.payload);
             if (value == payload)
                 return;
             let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);

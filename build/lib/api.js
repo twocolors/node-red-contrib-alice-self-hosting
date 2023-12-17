@@ -43,16 +43,17 @@ exports.Api = {
     callback_state: (service, device) => __awaiter(void 0, void 0, void 0, function* () {
         var _f, _g, _h, _j, _k;
         const credentials = service.credentials;
+        const ts = Date.now() / 1000;
         const _options = {
             method: 'POST',
-            timeout: 500,
+            timeout: 1000,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 'content-type': 'application/json',
                 Authorization: `OAuth ${credentials.oauth_token}`
             },
             data: {
-                ts: Math.floor(Date.now() / 1000),
+                ts: ts,
                 payload: {
                     user_id: service.id,
                     devices: [device]
@@ -74,16 +75,17 @@ exports.Api = {
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
     callback_discovery: (service) => {
         const credentials = service.credentials;
+        const ts = Date.now() / 1000;
         const _options = {
             method: 'POST',
-            timeout: 1500,
+            timeout: 1000,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
             headers: {
                 'content-type': 'application/json',
                 Authorization: `OAuth ${credentials.oauth_token}`
             },
             data: {
-                ts: Math.floor(Date.now() / 1000),
+                ts: ts,
                 payload: {
                     user_id: service.id
                 }

@@ -28,17 +28,18 @@ export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
   callback_state: async (service: NodeServiceType, device: any) => {
     const credentials: any = service.credentials;
+    const ts: number = Date.now() / 1000;
 
     const _options = {
       method: 'POST',
-      timeout: 500,
+      timeout: 1000,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
         'content-type': 'application/json',
         Authorization: `OAuth ${credentials.oauth_token}`
       },
       data: {
-        ts: Math.floor(Date.now() / 1000),
+        ts: ts,
         payload: {
           user_id: service.id,
           devices: [device]
@@ -60,17 +61,18 @@ export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
   callback_discovery: (service: NodeServiceType) => {
     const credentials: any = service.credentials;
+    const ts: number = Date.now() / 1000;
 
     const _options = {
       method: 'POST',
-      timeout: 1500,
+      timeout: 1000,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
       headers: {
         'content-type': 'application/json',
         Authorization: `OAuth ${credentials.oauth_token}`
       },
       data: {
-        ts: Math.floor(Date.now() / 1000),
+        ts: ts,
         payload: {
           user_id: service.id
         }

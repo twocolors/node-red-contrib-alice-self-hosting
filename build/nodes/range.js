@@ -76,8 +76,7 @@ module.exports = (RED) => {
             }, 5000);
         });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
-            const payload = msg.payload;
-            if (typeof payload != 'number') {
+            if (typeof msg.payload !== 'number') {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
@@ -85,6 +84,7 @@ module.exports = (RED) => {
                 }, 3000);
                 return;
             }
+            const payload = Number(msg.payload.toFixed(2));
             if (value == payload)
                 return;
             let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);

@@ -70,8 +70,7 @@ module.exports = (RED: NodeAPI) => {
     });
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
-      const payload: any = msg.payload;
-      if (typeof payload != 'boolean') {
+      if (typeof msg.payload !== 'boolean') {
         self.statusHelper.set(
           {
             fill: 'red',
@@ -82,6 +81,7 @@ module.exports = (RED: NodeAPI) => {
         );
         return;
       }
+      const payload: boolean = Boolean(msg.payload);
 
       if (value == payload) return;
 

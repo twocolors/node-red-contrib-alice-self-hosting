@@ -66,8 +66,7 @@ module.exports = (RED) => {
             }, 5000);
         });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
-            const payload = msg.payload;
-            if (typeof payload != 'boolean') {
+            if (typeof msg.payload !== 'boolean') {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
@@ -75,6 +74,7 @@ module.exports = (RED) => {
                 }, 3000);
                 return;
             }
+            const payload = Boolean(msg.payload);
             if (value == payload)
                 return;
             let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);

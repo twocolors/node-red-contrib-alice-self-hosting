@@ -88,8 +88,7 @@ module.exports = (RED: NodeAPI) => {
     });
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
-      const payload: any = msg.payload;
-      if (typeof payload != 'string') {
+      if (typeof msg.payload !== 'string') {
         self.statusHelper.set(
           {
             fill: 'red',
@@ -100,7 +99,7 @@ module.exports = (RED: NodeAPI) => {
         );
         return;
       }
-      if (!modes.includes(payload)) {
+      if (!modes.includes(msg.payload)) {
         self.statusHelper.set(
           {
             fill: 'red',
@@ -111,6 +110,7 @@ module.exports = (RED: NodeAPI) => {
         );
         return;
       }
+      const payload: string = String(msg.payload);
 
       if (value == payload) return;
 

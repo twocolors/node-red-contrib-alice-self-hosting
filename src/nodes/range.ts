@@ -81,8 +81,7 @@ module.exports = (RED: NodeAPI) => {
     });
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
-      const payload: any = msg.payload;
-      if (typeof payload != 'number') {
+      if (typeof msg.payload !== 'number') {
         self.statusHelper.set(
           {
             fill: 'red',
@@ -93,6 +92,7 @@ module.exports = (RED: NodeAPI) => {
         );
         return;
       }
+      const payload: number = Number(msg.payload.toFixed(2));
 
       if (value == payload) return;
 
