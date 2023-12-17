@@ -45,12 +45,12 @@ exports.Api = {
         var _a, _b, _c, _d, _e;
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 3,
-            retryDelay: retryCount => retryCount * 150,
+            retryDelay: retryCount => retryCount * 75,
             retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {
             method: 'GET',
-            timeout: 500,
+            timeout: 300,
             url: `https://login.yandex.ru/info`,
             headers: {
                 Authorization: `OAuth ${token}`
@@ -74,8 +74,8 @@ exports.Api = {
         const credentials = service.credentials;
         const ts = Date.now() / 1000;
         (0, axios_retry_1.default)(axios_1.default, {
-            retries: 5,
-            retryDelay: retryCount => retryCount * 150,
+            retries: 10,
+            retryDelay: retryCount => retryCount * 75,
             retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {
@@ -111,8 +111,8 @@ exports.Api = {
         const credentials = service.credentials;
         const ts = Date.now() / 1000;
         (0, axios_retry_1.default)(axios_1.default, {
-            retries: 5,
-            retryDelay: retryCount => retryCount * 150,
+            retries: 10,
+            retryDelay: retryCount => retryCount * 75,
             retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {

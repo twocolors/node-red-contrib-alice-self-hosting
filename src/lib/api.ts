@@ -8,13 +8,13 @@ export const Api: {[key: string]: any} = {
   login: async (token: string) => {
     axiosRetry(axios, {
       retries: 3,
-      retryDelay: retryCount => retryCount * 150,
+      retryDelay: retryCount => retryCount * 75,
       retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'GET',
-      timeout: 500,
+      timeout: 300,
       url: `https://login.yandex.ru/info`,
       headers: {
         Authorization: `OAuth ${token}`
@@ -38,8 +38,8 @@ export const Api: {[key: string]: any} = {
     const ts: number = Date.now() / 1000;
 
     axiosRetry(axios, {
-      retries: 5,
-      retryDelay: retryCount => retryCount * 150,
+      retries: 10,
+      retryDelay: retryCount => retryCount * 75,
       retryCondition: isRetryableError
     });
 
@@ -77,8 +77,8 @@ export const Api: {[key: string]: any} = {
     const ts: number = Date.now() / 1000;
 
     axiosRetry(axios, {
-      retries: 5,
-      retryDelay: retryCount => retryCount * 150,
+      retries: 10,
+      retryDelay: retryCount => retryCount * 75,
       retryCondition: isRetryableError
     });
 
