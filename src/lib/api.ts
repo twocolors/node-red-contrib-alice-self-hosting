@@ -38,14 +38,14 @@ export const Api: {[key: string]: any} = {
     const ts: number = Date.now() / 1000;
 
     axiosRetry(axios, {
-      retries: 3,
+      retries: 5,
       retryDelay: retryCount => retryCount * 150,
       retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'POST',
-      timeout: 1000,
+      timeout: 500,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
         'content-type': 'application/json',
@@ -77,14 +77,14 @@ export const Api: {[key: string]: any} = {
     const ts: number = Date.now() / 1000;
 
     axiosRetry(axios, {
-      retries: 3,
+      retries: 5,
       retryDelay: retryCount => retryCount * 150,
       retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'POST',
-      timeout: 1000,
+      timeout: 500,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
       headers: {
         'content-type': 'application/json',
