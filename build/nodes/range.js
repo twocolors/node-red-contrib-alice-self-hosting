@@ -34,7 +34,7 @@ module.exports = (RED) => {
             return;
         // init
         const keyCache = `${self.id}-${ctype}-${instance}`;
-        let value = device.cache.get(keyCache) || Number(0.0);
+        let value = device.cache.get(keyCache) || Number(min);
         // init
         try {
             self.statusHelper.clear();
