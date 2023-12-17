@@ -126,10 +126,8 @@ module.exports = (RED) => {
         };
         // state device
         self.updateStateDevice = () => api_1.Api.callback_state(self.service, self.device);
-        self.asyncUpdateStateDevice = () => api_1.Api.callback_state(self.service, self.device).catch(() => { });
         // info device
         self.updateInfoDevice = () => api_1.Api.callback_discovery(self.service);
-        self.asyncUpdateInfoDevice = () => api_1.Api.callback_discovery(self.service).catch(() => { });
     });
 };
 //# sourceMappingURL=device.js.map

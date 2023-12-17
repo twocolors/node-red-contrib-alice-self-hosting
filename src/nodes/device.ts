@@ -132,10 +132,8 @@ module.exports = (RED: NodeAPI) => {
 
     // state device
     self.updateStateDevice = () => Api.callback_state(self.service, self.device);
-    self.asyncUpdateStateDevice = () => Api.callback_state(self.service, self.device).catch(() => {});
 
     // info device
     self.updateInfoDevice = () => Api.callback_discovery(self.service);
-    self.asyncUpdateInfoDevice = () => Api.callback_discovery(self.service).catch(() => {});
   });
 };

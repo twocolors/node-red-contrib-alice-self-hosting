@@ -75,9 +75,8 @@ module.exports = (RED) => {
             }
             self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: text }, 3000);
             device.updateState(payload, ctype, instance);
-            yield device
-                .updateStateDevice()
-                .then((_) => {
+            try {
+                yield device.updateStateDevice();
                 value = payload;
                 device.cache.set(keyCache, value);
                 self.statusHelper.set({
@@ -85,8 +84,8 @@ module.exports = (RED) => {
                     shape: 'dot',
                     text: 'ok'
                 }, 3000);
-            })
-                .catch((error) => {
+            }
+            catch (error) {
                 device.updateState(value, ctype, instance);
                 self.error(`updateStateDevice: ${error}`);
                 self.statusHelper.set({
@@ -94,7 +93,7 @@ module.exports = (RED) => {
                     shape: 'dot',
                     text: error
                 }, 5000);
-            });
+            }
         }));
         const onState = (object) => {
             var _a, _b, _c;
@@ -108,7 +107,7 @@ module.exports = (RED) => {
                     instance: (_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.instance
                 });
                 if (reportable) {
-                    device.asyncUpdateStateDevice();
+                    device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
                 }
             }
         };
@@ -117,8 +116,14 @@ module.exports = (RED) => {
             device.removeCapability(ctype, instance);
             if (removed) {
                 device.cache.del(keyCache);
-                device.asyncUpdateInfoDevice();
-                device.asyncUpdateStateDevice();
+                try {
+                    yield device.updateInfoDevice();
+                }
+                catch (_) { }
+                try {
+                    yield device.updateStateDevice();
+                }
+                catch (_) { }
             }
             device.removeListener('onState', onState);
             done();

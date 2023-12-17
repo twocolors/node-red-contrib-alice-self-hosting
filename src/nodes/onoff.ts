@@ -82,34 +82,33 @@ module.exports = (RED: NodeAPI) => {
 
       device.updateState(payload, ctype, instance);
 
-      await device
-        .updateStateDevice()
-        .then((_: any) => {
-          value = payload;
-          device.cache.set(keyCache, value);
+      try {
+        await device.updateStateDevice();
 
-          self.statusHelper.set(
-            {
-              fill: 'blue',
-              shape: 'dot',
-              text: 'ok'
-            },
-            3000
-          );
-        })
-        .catch((error: any) => {
-          device.updateState(value, ctype, instance);
+        value = payload;
+        device.cache.set(keyCache, value);
 
-          self.error(`updateStateDevice: ${error}`);
-          self.statusHelper.set(
-            {
-              fill: 'red',
-              shape: 'dot',
-              text: error
-            },
-            5000
-          );
-        });
+        self.statusHelper.set(
+          {
+            fill: 'blue',
+            shape: 'dot',
+            text: 'ok'
+          },
+          3000
+        );
+      } catch (error: any) {
+        device.updateState(value, ctype, instance);
+
+        self.error(`updateStateDevice: ${error}`);
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: error
+          },
+          5000
+        );
+      }
     });
 
     const onState = (object: any) => {
@@ -127,7 +126,7 @@ module.exports = (RED: NodeAPI) => {
         });
 
         if (reportable) {
-          device.asyncUpdateStateDevice();
+          device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
         }
       }
     };
@@ -139,8 +138,12 @@ module.exports = (RED: NodeAPI) => {
       if (removed) {
         device.cache.del(keyCache);
 
-        device.asyncUpdateInfoDevice();
-        device.asyncUpdateStateDevice();
+        try {
+          await device.updateInfoDevice();
+        } catch (_) {}
+        try {
+          await device.updateStateDevice();
+        } catch (_) {}
       }
       device.removeListener('onState', onState);
       done();

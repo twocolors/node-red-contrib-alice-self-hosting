@@ -15,9 +15,7 @@ export type NodeDeviceType = Node & {
     setProperty: (c: any, type: string, instance: any) => void;
     removeProperty: (type: string, instance: any) => void;
     updateState: (val: any, type: string, instance: any) => void;
-    updateStateDevice: () => Promise<unknown>;
-    asyncUpdateStateDevice: () => void;
-    updateInfoDevice: () => Promise<unknown>;
-    asyncUpdateInfoDevice: () => void;
+    updateStateDevice: () => Promise<void>;
+    updateInfoDevice: () => Promise<void>;
     on(event: "onState", object: any): void;
 };
