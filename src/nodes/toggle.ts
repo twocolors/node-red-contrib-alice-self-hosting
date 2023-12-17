@@ -1,4 +1,6 @@
 import {NodeAPI} from 'node-red';
+import {NodeDeviceType} from '../lib/types';
+import {Status} from '../lib/status';
 import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
@@ -10,52 +12,24 @@ module.exports = (RED: NodeAPI) => {
 
     // var
     const name = config.name;
-    const device = RED.nodes.getNode(config.device) as any;
+    const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.toggle';
     const instance = config.instance;
     const retrievable = true;
     const reportable = config.response; // reportable = response
 
     // helpers
-    const clearStatus = (timeout = 0) => {
-      setTimeout(() => {
-        self.status({});
-      }, timeout);
-    };
-
-    const setStatus = (status: any, timeout = 0) => {
-      self.status(status);
-      if (timeout) {
-        clearStatus(timeout);
-      }
-    };
-
-    const _updateStateDevice = async () => {
-      try {
-        await device.updateStateDevice();
-      } catch (error) {
-        self.error(error);
-        setStatus({fill: 'red', shape: 'dot', text: error}, 5000);
-      }
-    };
-
-    const _updateInfoDevice = async () => {
-      try {
-        await device.updateInfoDevice();
-      } catch (error) {
-        self.error(error);
-        setStatus({fill: 'red', shape: 'dot', text: error}, 5000);
-      }
-    };
+    self.statusHelper = new Status(self);
 
     // device not init
     if (!device) return;
     // init
-    let value = device.storage[`${ctype}-${instance}`] || Boolean(false);
+    const keyCache = `${self.id}-${ctype}-${instance}`;
+    let value = device.cache.get(keyCache) || Boolean(false);
 
     // init
     try {
-      setStatus({});
+      self.statusHelper.clear();
 
       device.setCapability(
         {
@@ -75,7 +49,7 @@ module.exports = (RED: NodeAPI) => {
       );
     } catch (error) {
       self.error(error);
-      setStatus({
+      self.statusHelper.set({
         fill: 'red',
         shape: 'dot',
         text: error
@@ -83,22 +57,69 @@ module.exports = (RED: NodeAPI) => {
       return;
     }
 
-    _updateInfoDevice();
+    device.updateInfoDevice().catch((error: any) => {
+      self.error(`updateInfoDevice: ${error}`);
+      self.statusHelper.set(
+        {
+          fill: 'red',
+          shape: 'dot',
+          text: error
+        },
+        5000
+      );
+    });
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
       const payload: any = msg.payload;
-      if (value == payload) return;
-      value = payload;
-
-      let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : inspect(payload);
-      if (text && text.length > 32) {
-        text = text.substr(0, 32) + '...';
+      if (typeof payload != 'boolean') {
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: `Wrong type! msg.payload must be boolean`
+          },
+          3000
+        );
+        return;
       }
-      setStatus({fill: 'yellow', shape: 'dot', text: text}, 3000);
+
+      if (value == payload) return;
+
+      let text: string = payload && typeof payload !== 'object' ? String(payload) : inspect(payload);
+      if (text && text.length > 32) {
+        text = `${text.substring(0, 32)}...`;
+      }
+      self.statusHelper.set({fill: 'yellow', shape: 'dot', text: text}, 3000);
 
       device.updateState(payload, ctype, instance);
 
-      await _updateStateDevice();
+      try {
+        await device.updateStateDevice();
+
+        value = payload;
+        device.cache.set(keyCache, value);
+
+        self.statusHelper.set(
+          {
+            fill: 'blue',
+            shape: 'ring',
+            text: 'Ok'
+          },
+          3000
+        );
+      } catch (error: any) {
+        device.updateState(value, ctype, instance);
+
+        self.error(`updateStateDevice: ${error}`);
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: error
+          },
+          5000
+        );
+      }
     });
 
     const onState = (object: any) => {
@@ -107,6 +128,8 @@ module.exports = (RED: NodeAPI) => {
 
         device.updateState(value, ctype, instance);
 
+        device.cache.set(keyCache, value);
+
         self.send({
           payload: value,
           type: object?.type,
@@ -114,7 +137,7 @@ module.exports = (RED: NodeAPI) => {
         });
 
         if (reportable) {
-          _updateStateDevice();
+          device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
         }
       }
     };
@@ -124,9 +147,13 @@ module.exports = (RED: NodeAPI) => {
     self.on('close', async (removed: boolean, done: any) => {
       device.removeCapability(ctype, instance);
       if (removed) {
-        device.storage[`${ctype}-${instance}`] = undefined;
-        await _updateInfoDevice();
-        await _updateStateDevice();
+        device.cache.del(keyCache);
+        try {
+          await device.updateInfoDevice();
+        } catch (_) {}
+        try {
+          await device.updateStateDevice();
+        } catch (_) {}
       }
       device.removeListener('onState', onState);
       done();
