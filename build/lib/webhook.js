@@ -31,7 +31,7 @@ module.exports = (RED) => {
     };
     const authenticationMiddleware = (node) => {
         return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-            var _a;
+            var _a, _b;
             const cache = node.cache;
             const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
             const key = `${token}-${node.id}`;
@@ -39,8 +39,13 @@ module.exports = (RED) => {
                 return next();
             }
             try {
-                const user = yield api_1.Api.login(token);
-                cache.set(key, user);
+                const response = yield api_1.Api.login(token);
+                if ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.id) {
+                    cache.set(key, response.data);
+                }
+                else {
+                    return res.sendStatus(401);
+                }
             }
             catch (error) {
                 return res.sendStatus(401);

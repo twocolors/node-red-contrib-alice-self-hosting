@@ -33,8 +33,12 @@ module.exports = (RED: NodeAPI) => {
       }
 
       try {
-        const user = await Api.login(token);
-        cache.set(key, user);
+        const response = await Api.login(token);
+        if (response?.data?.id) {
+          cache.set(key, response.data);
+        } else {
+          return res.sendStatus(401);
+        }
       } catch (error) {
         return res.sendStatus(401);
       }
