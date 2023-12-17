@@ -82,7 +82,7 @@ exports.Api = {
         });
         const _options = {
             method: 'POST',
-            timeout: 500,
+            timeout: 750,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 'content-type': 'application/json',
@@ -120,7 +120,7 @@ exports.Api = {
         });
         const _options = {
             method: 'POST',
-            timeout: 500,
+            timeout: 750,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
             headers: {
                 'content-type': 'application/json',
