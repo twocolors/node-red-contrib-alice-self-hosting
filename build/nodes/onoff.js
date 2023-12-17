@@ -33,7 +33,6 @@ module.exports = (RED) => {
         let value = device.cache.get(keyCache) || Boolean(false);
         // init
         try {
-            self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
                 reportable: reportable,
@@ -67,11 +66,19 @@ module.exports = (RED) => {
         });
         self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
             const payload = msg.payload;
+            if (typeof payload != 'boolean') {
+                self.statusHelper.set({
+                    fill: 'red',
+                    shape: 'dot',
+                    text: `Wrong type! msg.payload must be boolean`
+                }, 3000);
+                return;
+            }
             if (value == payload)
                 return;
-            let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : (0, util_1.inspect)(payload);
+            let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);
             if (text && text.length > 32) {
-                text = text.substr(0, 32) + '...';
+                text = `${text.substring(0, 32)}...`;
             }
             self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: text }, 3000);
             device.updateState(payload, ctype, instance);
@@ -81,8 +88,8 @@ module.exports = (RED) => {
                 device.cache.set(keyCache, value);
                 self.statusHelper.set({
                     fill: 'blue',
-                    shape: 'dot',
-                    text: 'ok'
+                    shape: 'ring',
+                    text: 'Ok'
                 }, 3000);
             }
             catch (error) {
@@ -113,6 +120,7 @@ module.exports = (RED) => {
         };
         device.on('onState', onState);
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
+            self.statusHelper.clear();
             device.removeCapability(ctype, instance);
             if (removed) {
                 device.cache.del(keyCache);

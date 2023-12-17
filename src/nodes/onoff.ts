@@ -29,8 +29,6 @@ module.exports = (RED: NodeAPI) => {
 
     // init
     try {
-      self.statusHelper.clear();
-
       device.setCapability(
         {
           type: ctype,
@@ -72,11 +70,23 @@ module.exports = (RED: NodeAPI) => {
 
     self.on('input', async (msg: any, send: () => any, done: () => any) => {
       const payload: any = msg.payload;
+      if (typeof payload != 'boolean') {
+        self.statusHelper.set(
+          {
+            fill: 'red',
+            shape: 'dot',
+            text: `Wrong type! msg.payload must be boolean`
+          },
+          3000
+        );
+        return;
+      }
+
       if (value == payload) return;
 
-      let text = typeof payload !== 'undefined' && typeof payload !== 'object' ? payload : inspect(payload);
+      let text: string = payload && typeof payload !== 'object' ? String(payload) : inspect(payload);
       if (text && text.length > 32) {
-        text = text.substr(0, 32) + '...';
+        text = `${text.substring(0, 32)}...`;
       }
       self.statusHelper.set({fill: 'yellow', shape: 'dot', text: text}, 3000);
 
@@ -91,8 +101,8 @@ module.exports = (RED: NodeAPI) => {
         self.statusHelper.set(
           {
             fill: 'blue',
-            shape: 'dot',
-            text: 'ok'
+            shape: 'ring',
+            text: 'Ok'
           },
           3000
         );
@@ -134,6 +144,7 @@ module.exports = (RED: NodeAPI) => {
     device.on('onState', onState);
 
     self.on('close', async (removed: boolean, done: any) => {
+      self.statusHelper.clear();
       device.removeCapability(ctype, instance);
       if (removed) {
         device.cache.del(keyCache);
