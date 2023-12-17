@@ -26,15 +26,16 @@
       "device": "build/nodes/device.js",
       "onoff": "build/nodes/onoff.js",
       "toggle": "build/nodes/toggle.js",
-      "range":"build/nodes/range.js",
-      "color":"build/nodes/color.js",
-      "mode":"build/nodes/mode.js",
+      "range": "build/nodes/range.js",
+      "color": "build/nodes/color.js",
+      "mode": "build/nodes/mode.js",
       "sensor": "build/nodes/sensor.js",
-      "event":"build/nodes/event.js"
+      "event": "build/nodes/event.js"
     }
   },
   "dependencies": {
     "axios": "1.6.2",
+    "axios-retry": "4.0.0",
     "nano-cache": "1.1.2"
   },
   "devDependencies": {

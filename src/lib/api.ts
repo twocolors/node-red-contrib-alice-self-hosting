@@ -1,10 +1,17 @@
 import axios, {AxiosError} from 'axios';
 import {NodeServiceType} from './types';
 import {inspect} from 'util';
+import axiosRetry, {isRetryableError} from 'axios-retry';
 
 export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/id/doc/ru/user-information
   login: async (token: string) => {
+    axiosRetry(axios, {
+      retries: 3,
+      retryDelay: retryCount => retryCount * 150,
+      retryCondition: isRetryableError
+    });
+
     const _options = {
       method: 'GET',
       timeout: 500,
@@ -29,6 +36,12 @@ export const Api: {[key: string]: any} = {
   callback_state: async (service: NodeServiceType, device: any) => {
     const credentials: any = service.credentials;
     const ts: number = Date.now() / 1000;
+
+    axiosRetry(axios, {
+      retries: 3,
+      retryDelay: retryCount => retryCount * 150,
+      retryCondition: isRetryableError
+    });
 
     const _options = {
       method: 'POST',
@@ -62,6 +75,12 @@ export const Api: {[key: string]: any} = {
   callback_discovery: (service: NodeServiceType) => {
     const credentials: any = service.credentials;
     const ts: number = Date.now() / 1000;
+
+    axiosRetry(axios, {
+      retries: 3,
+      retryDelay: retryCount => retryCount * 150,
+      retryCondition: isRetryableError
+    });
 
     const _options = {
       method: 'POST',
