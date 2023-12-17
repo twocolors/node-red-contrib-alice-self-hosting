@@ -39,6 +39,8 @@ exports.Api = void 0;
 const axios_1 = __importDefault(require("axios"));
 const util_1 = require("util");
 const axios_retry_1 = __importStar(require("axios-retry"));
+const version = require('../../package.json').version.trim();
+const name = require('../../package.json').name.trim();
 exports.Api = {
     // https://yandex.ru/dev/id/doc/ru/user-information
     login: (token) => __awaiter(void 0, void 0, void 0, function* () {
@@ -54,7 +56,8 @@ exports.Api = {
             timeout: 300,
             url: `https://login.yandex.ru/info`,
             headers: {
-                Authorization: `OAuth ${token}`
+                Authorization: `OAuth ${token}`,
+                'User-Agent': `${name}/${version} Node-RED`
             }
         };
         try {
@@ -85,8 +88,9 @@ exports.Api = {
             timeout: 750,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
-                'content-type': 'application/json',
-                Authorization: `OAuth ${credentials.oauth_token}`
+                Authorization: `OAuth ${credentials.oauth_token}`,
+                'User-Agent': `${name}/${version} Node-RED`,
+                'Content-Type': `application/json`
             },
             data: {
                 ts: ts,
@@ -123,8 +127,9 @@ exports.Api = {
             timeout: 750,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
             headers: {
-                'content-type': 'application/json',
-                Authorization: `OAuth ${credentials.oauth_token}`
+                Authorization: `OAuth ${credentials.oauth_token}`,
+                'User-Agent': `${name}/${version} Node-RED`,
+                'Content-Type': `application/json`
             },
             data: {
                 ts: ts,

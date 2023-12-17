@@ -3,6 +3,9 @@ import {NodeServiceType} from './types';
 import {inspect} from 'util';
 import axiosRetry, {isRetryableError} from 'axios-retry';
 
+const version: string = require('../../package.json').version.trim();
+const name: string = require('../../package.json').name.trim();
+
 export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/id/doc/ru/user-information
   login: async (token: string) => {
@@ -18,7 +21,8 @@ export const Api: {[key: string]: any} = {
       timeout: 300,
       url: `https://login.yandex.ru/info`,
       headers: {
-        Authorization: `OAuth ${token}`
+        Authorization: `OAuth ${token}`,
+        'User-Agent': `${name}/${version} Node-RED`
       }
     };
 
@@ -50,8 +54,9 @@ export const Api: {[key: string]: any} = {
       timeout: 750,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
-        'content-type': 'application/json',
-        Authorization: `OAuth ${credentials.oauth_token}`
+        Authorization: `OAuth ${credentials.oauth_token}`,
+        'User-Agent': `${name}/${version} Node-RED`,
+        'Content-Type': `application/json`
       },
       data: {
         ts: ts,
@@ -90,8 +95,9 @@ export const Api: {[key: string]: any} = {
       timeout: 750,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
       headers: {
-        'content-type': 'application/json',
-        Authorization: `OAuth ${credentials.oauth_token}`
+        Authorization: `OAuth ${credentials.oauth_token}`,
+        'User-Agent': `${name}/${version} Node-RED`,
+        'Content-Type': `application/json`
       },
       data: {
         ts: ts,
