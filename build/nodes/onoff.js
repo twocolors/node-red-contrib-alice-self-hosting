@@ -33,6 +33,7 @@ module.exports = (RED) => {
         let value = device.cache.get(keyCache) || Boolean(false);
         // init
         try {
+            self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
                 reportable: reportable,
@@ -120,7 +121,6 @@ module.exports = (RED) => {
         };
         device.on('onState', onState);
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
-            self.statusHelper.clear();
             device.removeCapability(ctype, instance);
             if (removed) {
                 device.cache.del(keyCache);

@@ -29,6 +29,8 @@ module.exports = (RED: NodeAPI) => {
 
     // init
     try {
+      self.statusHelper.clear();
+
       device.setCapability(
         {
           type: ctype,
@@ -144,11 +146,9 @@ module.exports = (RED: NodeAPI) => {
     device.on('onState', onState);
 
     self.on('close', async (removed: boolean, done: any) => {
-      self.statusHelper.clear();
       device.removeCapability(ctype, instance);
       if (removed) {
         device.cache.del(keyCache);
-
         try {
           await device.updateInfoDevice();
         } catch (_) {}
