@@ -183,6 +183,7 @@ module.exports = (RED) => {
         RED.httpNode.use(route.middleware, validatorMiddleware); // validatorMiddleware
         RED.httpNode.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
         // route
+        RED.httpNode.get(route.base, pong);
         RED.httpNode.head(route.pong, pong);
         RED.httpNode.post(route.unlink, unlink(self));
         RED.httpNode.get(route.devices, devices(self));

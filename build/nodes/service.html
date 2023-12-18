@@ -34,7 +34,8 @@
 
       function _path(path) {
         $('#node-config-input-path').val(path);
-        $('#webhook').text(window.location.origin + '/' + path + '/webhook');
+        let webhook = window.location.origin + '/' + path + '/webhook';
+        $('#webhook').html('<a target="_blank" href="' + webhook + '">' + webhook + '</a>');
       }
     }
   });
