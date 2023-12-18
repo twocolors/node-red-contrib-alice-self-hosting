@@ -39,8 +39,13 @@ exports.Api = void 0;
 const axios_1 = __importDefault(require("axios"));
 const util_1 = require("util");
 const axios_retry_1 = __importStar(require("axios-retry"));
-const version = require('../../package.json').version.trim();
-const name = require('../../package.json').name.trim();
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Package = require('../../package.json');
+// if someone will be read this code
+// I say: "Yandex sorry for axiosRetry"
+// i know, i fix 5xx from response (Yandex),
+// but make more 5xx for other ...
+const userAgent = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 exports.Api = {
     // https://yandex.ru/dev/id/doc/ru/user-information
     login: (token) => __awaiter(void 0, void 0, void 0, function* () {
@@ -54,10 +59,10 @@ exports.Api = {
         const _options = {
             method: 'GET',
             timeout: 300,
-            url: `https://login.yandex.ru/info`,
+            url: 'https://login.yandex.ru/info',
             headers: {
                 Authorization: `OAuth ${token}`,
-                'User-Agent': `${name}/${version} Node-RED`
+                'User-Agent': userAgent
             }
         };
         try {
@@ -89,8 +94,8 @@ exports.Api = {
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,
-                'User-Agent': `${name}/${version} Node-RED`,
-                'Content-Type': `application/json`
+                'User-Agent': userAgent,
+                'Content-Type': 'application/json'
             },
             data: {
                 ts: ts,
@@ -128,8 +133,8 @@ exports.Api = {
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,
-                'User-Agent': `${name}/${version} Node-RED`,
-                'Content-Type': `application/json`
+                'User-Agent': userAgent,
+                'Content-Type': 'application/json'
             },
             data: {
                 ts: ts,

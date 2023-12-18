@@ -17,5 +17,5 @@ export type NodeDeviceType = Node & {
     updateState: (val: any, type: string, instance: any) => void;
     updateStateDevice: () => Promise<void>;
     updateInfoDevice: () => Promise<void>;
-    on(event: "onState", object: any): void;
+    on(event: 'onState', object: any): void;
 };

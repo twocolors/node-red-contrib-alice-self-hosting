@@ -16,6 +16,7 @@ module.exports = (RED) => {
             throw new Error('Parameter `Path Url` is required');
         }
     };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const webhook = require('../lib/webhook')(RED);
     // use cache (14 days and 4 MB)
     const cache = new nano_cache_1.default({
@@ -23,6 +24,7 @@ module.exports = (RED) => {
         maxEvictBytes: 4 * nano_cache_1.default.SIZE.MB
     });
     RED.nodes.registerType('alice-sh-service', function (config) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
         self.config = config;
         RED.nodes.createNode(self, config);

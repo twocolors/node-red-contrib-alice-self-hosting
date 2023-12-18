@@ -5,13 +5,13 @@ import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-event', function (this: any, config: any) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self.config = config;
 
     RED.nodes.createNode(this, config);
 
     // var
-    const name = config.name;
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ptype = 'devices.properties.event';
     const instance = config.instance;
@@ -76,14 +76,14 @@ module.exports = (RED: NodeAPI) => {
       );
     });
 
-    self.on('input', async (msg: any, send: () => any, done: () => any) => {
+    self.on('input', async (msg: any) => {
       const payload: any = msg.payload;
       if (!events.includes(payload)) {
         self.statusHelper.set(
           {
             fill: 'red',
             shape: 'dot',
-            text: `Unsupported events, msg.payload must be from the list of allowed events`
+            text: 'Unsupported events, msg.payload must be from the list of allowed events'
           },
           3000
         );
@@ -135,10 +135,14 @@ module.exports = (RED: NodeAPI) => {
         device.cache.del(keyCache);
         try {
           await device.updateInfoDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
         try {
           await device.updateStateDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
       }
       done();
     });

@@ -5,13 +5,13 @@ import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-mode', function (this: any, config: any) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self.config = config;
 
     RED.nodes.createNode(this, config);
 
     // var
-    const name = config.name;
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.mode';
     const retrievable = true;
@@ -23,7 +23,7 @@ module.exports = (RED: NodeAPI) => {
     self.statusHelper = new Status(self);
 
     if (modes.length < 1) {
-      const error = `In the list of supported commands, there must be at least one command`;
+      const error = 'In the list of supported commands, there must be at least one command';
       self.error(error);
       self.statusHelper.set({
         fill: 'red',
@@ -87,13 +87,13 @@ module.exports = (RED: NodeAPI) => {
       );
     });
 
-    self.on('input', async (msg: any, send: () => any, done: () => any) => {
+    self.on('input', async (msg: any) => {
       if (typeof msg.payload !== 'string') {
         self.statusHelper.set(
           {
             fill: 'red',
             shape: 'dot',
-            text: `Wrong type! msg.payload must be string`
+            text: 'Wrong type! msg.payload must be string'
           },
           3000
         );
@@ -104,7 +104,7 @@ module.exports = (RED: NodeAPI) => {
           {
             fill: 'red',
             shape: 'dot',
-            text: `Unsupported command, msg.payload must be from the list of allowed modes`
+            text: 'Unsupported command, msg.payload must be from the list of allowed modes'
           },
           3000
         );
@@ -179,10 +179,14 @@ module.exports = (RED: NodeAPI) => {
         device.cache.del(keyCache);
         try {
           await device.updateInfoDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
         try {
           await device.updateStateDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
       }
       device.removeListener('onState', onState);
       done();

@@ -2,9 +2,15 @@ import axios, {AxiosError} from 'axios';
 import {NodeServiceType} from './types';
 import {inspect} from 'util';
 import axiosRetry, {isRetryableError} from 'axios-retry';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Package: any = require('../../package.json');
 
-const version: string = require('../../package.json').version.trim();
-const name: string = require('../../package.json').name.trim();
+// if someone will be read this code
+// I say: "Yandex sorry for axiosRetry"
+// i know, i fix 5xx from response (Yandex),
+// but make more 5xx for other ...
+
+const userAgent = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 
 export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/id/doc/ru/user-information
@@ -19,10 +25,10 @@ export const Api: {[key: string]: any} = {
     const _options = {
       method: 'GET',
       timeout: 300,
-      url: `https://login.yandex.ru/info`,
+      url: 'https://login.yandex.ru/info',
       headers: {
         Authorization: `OAuth ${token}`,
-        'User-Agent': `${name}/${version} Node-RED`
+        'User-Agent': userAgent
       }
     };
 
@@ -55,8 +61,8 @@ export const Api: {[key: string]: any} = {
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
         Authorization: `OAuth ${credentials.oauth_token}`,
-        'User-Agent': `${name}/${version} Node-RED`,
-        'Content-Type': `application/json`
+        'User-Agent': userAgent,
+        'Content-Type': 'application/json'
       },
       data: {
         ts: ts,
@@ -96,8 +102,8 @@ export const Api: {[key: string]: any} = {
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
       headers: {
         Authorization: `OAuth ${credentials.oauth_token}`,
-        'User-Agent': `${name}/${version} Node-RED`,
-        'Content-Type': `application/json`
+        'User-Agent': userAgent,
+        'Content-Type': 'application/json'
       },
       data: {
         ts: ts,

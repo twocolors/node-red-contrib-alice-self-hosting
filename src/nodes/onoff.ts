@@ -5,13 +5,13 @@ import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-onoff', function (this: any, config: any) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self.config = config;
 
     RED.nodes.createNode(this, config);
 
     // var
-    const name = config.name;
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.on_off';
     const instance = 'on';
@@ -70,13 +70,13 @@ module.exports = (RED: NodeAPI) => {
       );
     });
 
-    self.on('input', async (msg: any, send: () => any, done: () => any) => {
+    self.on('input', async (msg: any) => {
       if (typeof msg.payload !== 'boolean') {
         self.statusHelper.set(
           {
             fill: 'red',
             shape: 'dot',
-            text: `Wrong type! msg.payload must be boolean`
+            text: 'Wrong type! msg.payload must be boolean'
           },
           3000
         );
@@ -151,10 +151,14 @@ module.exports = (RED: NodeAPI) => {
         device.cache.del(keyCache);
         try {
           await device.updateInfoDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
         try {
           await device.updateStateDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
       }
       device.removeListener('onState', onState);
       done();

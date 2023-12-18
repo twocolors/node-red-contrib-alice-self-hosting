@@ -14,6 +14,7 @@ module.exports = (RED: NodeAPI) => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const webhook = require('../lib/webhook')(RED);
 
   // use cache (14 days and 4 MB)
@@ -25,6 +26,7 @@ module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType(
     'alice-sh-service',
     function (this: any, config: any) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       self.config = config;
       RED.nodes.createNode(self, config);

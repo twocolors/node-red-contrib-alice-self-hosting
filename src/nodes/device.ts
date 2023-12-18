@@ -1,11 +1,13 @@
-import {NodeAPI, runtime} from 'node-red';
+import {NodeAPI} from 'node-red';
 import {Api} from '../lib/api';
 import {NodeServiceType} from '../lib/types';
 
 module.exports = (RED: NodeAPI) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const version: string = require('../../package.json').version.trim();
 
   RED.nodes.registerType('alice-sh-device', function (this: any, config: any) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self.config = config;
 
@@ -26,7 +28,7 @@ module.exports = (RED: NodeAPI) => {
       device_info: {
         manufacturer: 'Node-RED',
         model: 'virtual device',
-        sw_version: version,
+        sw_version: version
       },
       capabilities: [],
       properties: []
@@ -77,7 +79,7 @@ module.exports = (RED: NodeAPI) => {
       if (c !== undefined && capabilities === undefined) {
         self.device.capabilities.push(c);
       } else {
-        throw new Error(`Parameters 'capability' is Dublicated on some Device!`);
+        throw new Error("Parameters 'capability' is Dublicated on some Device!");
       }
     };
 
@@ -103,7 +105,7 @@ module.exports = (RED: NodeAPI) => {
       if (p !== undefined && property === undefined) {
         self.device.properties.push(p);
       } else {
-        throw new Error(`Parameters 'property' is Dublicated on some Device!`);
+        throw new Error("Parameters 'property' is Dublicated on some Device!");
       }
     };
 
@@ -127,7 +129,9 @@ module.exports = (RED: NodeAPI) => {
         const actType = String(cp.type).split('.')[2];
         const value = convertToYandexValue(val, actType);
         cp.state = {instance, value: value};
-      } catch (_) {}
+      } catch (_) {
+        /* empty */
+      }
     };
 
     // state device

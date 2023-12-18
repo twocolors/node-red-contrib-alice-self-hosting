@@ -13,11 +13,11 @@ const status_1 = require("../lib/status");
 const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-color', function (config) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
         self.config = config;
         RED.nodes.createNode(this, config);
         // var
-        const name = config.name;
         const device = RED.nodes.getNode(config.device);
         const ctype = 'devices.capabilities.color_setting';
         const retrievable = true;
@@ -31,7 +31,7 @@ module.exports = (RED) => {
         // helpers
         self.statusHelper = new status_1.Status(self);
         if (!color_support && !temperature_k && color_scene.length < 1) {
-            const error = `Least one parameter must be enabled`;
+            const error = 'Least one parameter must be enabled';
             self.error(error);
             self.statusHelper.set({
                 fill: 'red',
@@ -45,7 +45,7 @@ module.exports = (RED) => {
             return;
         // init
         let instance;
-        let parameters = {};
+        const parameters = {};
         let value;
         if (color_support) {
             instance = scheme;
@@ -104,12 +104,12 @@ module.exports = (RED) => {
                 text: error
             }, 5000);
         });
-        self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
+        self.on('input', (msg) => __awaiter(this, void 0, void 0, function* () {
             if (typeof msg.payload !== 'object' && typeof msg.payload !== 'number' && typeof msg.payload !== 'string') {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
-                    text: `Wrong type! msg.payload type is unsupported`
+                    text: 'Wrong type! msg.payload type is unsupported'
                 }, 3000);
                 return;
             }
@@ -166,11 +166,15 @@ module.exports = (RED) => {
                 try {
                     yield device.updateInfoDevice();
                 }
-                catch (_) { }
+                catch (_) {
+                    /* empty */
+                }
                 try {
                     yield device.updateStateDevice();
                 }
-                catch (_) { }
+                catch (_) {
+                    /* empty */
+                }
             }
             device.removeListener('onState', onState);
             done();

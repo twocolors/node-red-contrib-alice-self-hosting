@@ -13,11 +13,11 @@ const status_1 = require("../lib/status");
 const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-range', function (config) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
         self.config = config;
         RED.nodes.createNode(this, config);
         // var
-        const name = config.name;
         const device = RED.nodes.getNode(config.device);
         const ctype = 'devices.capabilities.range';
         const instance = config.instance;
@@ -75,12 +75,12 @@ module.exports = (RED) => {
                 text: error
             }, 5000);
         });
-        self.on('input', (msg, send, done) => __awaiter(this, void 0, void 0, function* () {
+        self.on('input', (msg) => __awaiter(this, void 0, void 0, function* () {
             if (typeof msg.payload !== 'number') {
                 self.statusHelper.set({
                     fill: 'red',
                     shape: 'dot',
-                    text: `Wrong type! msg.payload must be number`
+                    text: 'Wrong type! msg.payload must be number'
                 }, 3000);
                 return;
             }
@@ -145,11 +145,15 @@ module.exports = (RED) => {
                 try {
                     yield device.updateInfoDevice();
                 }
-                catch (_) { }
+                catch (_) {
+                    /* empty */
+                }
                 try {
                     yield device.updateStateDevice();
                 }
-                catch (_) { }
+                catch (_) {
+                    /* empty */
+                }
             }
             device.removeListener('onState', onState);
             done();

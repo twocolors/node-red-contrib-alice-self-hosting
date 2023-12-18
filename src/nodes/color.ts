@@ -5,13 +5,13 @@ import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-color', function (this: any, config: any) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     self.config = config;
 
     RED.nodes.createNode(this, config);
 
     // var
-    const name = config.name;
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.color_setting';
     const retrievable = true;
@@ -27,7 +27,7 @@ module.exports = (RED: NodeAPI) => {
     self.statusHelper = new Status(self);
 
     if (!color_support && !temperature_k && color_scene.length < 1) {
-      const error = `Least one parameter must be enabled`;
+      const error = 'Least one parameter must be enabled';
       self.error(error);
       self.statusHelper.set({
         fill: 'red',
@@ -41,7 +41,7 @@ module.exports = (RED: NodeAPI) => {
     if (!device) return;
     // init
     let instance: any;
-    let parameters: any = {};
+    const parameters: any = {};
     let value: any;
     if (color_support) {
       instance = scheme;
@@ -111,13 +111,13 @@ module.exports = (RED: NodeAPI) => {
       );
     });
 
-    self.on('input', async (msg: any, send: () => any, done: () => any) => {
+    self.on('input', async (msg: any) => {
       if (typeof msg.payload !== 'object' && typeof msg.payload !== 'number' && typeof msg.payload !== 'string') {
         self.statusHelper.set(
           {
             fill: 'red',
             shape: 'dot',
-            text: `Wrong type! msg.payload type is unsupported`
+            text: 'Wrong type! msg.payload type is unsupported'
           },
           3000
         );
@@ -192,10 +192,14 @@ module.exports = (RED: NodeAPI) => {
         device.cache.del(keyCache);
         try {
           await device.updateInfoDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
         try {
           await device.updateStateDevice();
-        } catch (_) {}
+        } catch (_) {
+          /* empty */
+        }
       }
       device.removeListener('onState', onState);
       done();

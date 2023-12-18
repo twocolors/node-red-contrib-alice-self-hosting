@@ -1,4 +1,4 @@
-import {NodeAPI, Node} from 'node-red';
+import {NodeAPI} from 'node-red';
 import express from 'express';
 import {NodeServiceType, NodeDeviceType} from './types';
 import {Api} from './api';
@@ -11,6 +11,7 @@ module.exports = (RED: NodeAPI) => {
   };
 
   // middleware
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _logMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
     if (req.originalUrl) {
       console.log(`${req.method} - ${req.originalUrl}`);
@@ -64,7 +65,7 @@ module.exports = (RED: NodeAPI) => {
     };
   };
   const devices = (node: NodeServiceType) => {
-    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return (req: express.Request, res: express.Response) => {
       const request_id: string | undefined = req.get('X-Request-Id');
 
       const json: any = {
@@ -86,7 +87,7 @@ module.exports = (RED: NodeAPI) => {
     };
   };
   const query = (node: NodeServiceType) => {
-    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return (req: express.Request, res: express.Response) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.devices;
 
@@ -105,7 +106,7 @@ module.exports = (RED: NodeAPI) => {
         } else {
           json.payload.devices.push({
             id: d.id,
-            error_code: `DEVICE_NOT_FOUND`,
+            error_code: 'DEVICE_NOT_FOUND',
             error_message: `device '${d.id})' not found`
           });
         }
@@ -115,7 +116,7 @@ module.exports = (RED: NodeAPI) => {
     };
   };
   const action = (node: NodeServiceType) => {
-    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return (req: express.Request, res: express.Response) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.payload?.devices;
 
@@ -154,7 +155,7 @@ module.exports = (RED: NodeAPI) => {
         } else {
           json.payload.devices.push({
             id: d.id,
-            error_code: `DEVICE_NOT_FOUND`,
+            error_code: 'DEVICE_NOT_FOUND',
             error_message: `device '${d.id})' not found`
           });
         }
@@ -198,7 +199,7 @@ module.exports = (RED: NodeAPI) => {
     const pathRegexp: RegExp = new RegExp(`^${path}`, 'g');
 
     for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
-      let route = RED.httpNode._router.stack[i];
+      const route = RED.httpNode._router.stack[i];
       if (route.route && route.route.path.match(pathRegexp)) {
         // console.log(`${i} - delete - ${route.route.path}`);
         RED.httpNode._router.stack.splice(i, 1);

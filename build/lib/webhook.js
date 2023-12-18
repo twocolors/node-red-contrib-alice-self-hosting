@@ -16,6 +16,7 @@ module.exports = (RED) => {
         return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
     };
     // middleware
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const _logMiddleware = function (req, res, next) {
         if (req.originalUrl) {
             console.log(`${req.method} - ${req.originalUrl}`);
@@ -69,7 +70,7 @@ module.exports = (RED) => {
         };
     };
     const devices = (node) => {
-        return (req, res, next) => {
+        return (req, res) => {
             const request_id = req.get('X-Request-Id');
             const json = {
                 request_id: request_id,
@@ -89,7 +90,7 @@ module.exports = (RED) => {
         };
     };
     const query = (node) => {
-        return (req, res, next) => {
+        return (req, res) => {
             var _a;
             const request_id = req.get('X-Request-Id');
             const devices = (_a = req.body) === null || _a === void 0 ? void 0 : _a.devices;
@@ -109,7 +110,7 @@ module.exports = (RED) => {
                 else {
                     json.payload.devices.push({
                         id: d.id,
-                        error_code: `DEVICE_NOT_FOUND`,
+                        error_code: 'DEVICE_NOT_FOUND',
                         error_message: `device '${d.id})' not found`
                     });
                 }
@@ -118,7 +119,7 @@ module.exports = (RED) => {
         };
     };
     const action = (node) => {
-        return (req, res, next) => {
+        return (req, res) => {
             var _a, _b;
             const request_id = req.get('X-Request-Id');
             const devices = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.devices;
@@ -155,7 +156,7 @@ module.exports = (RED) => {
                 else {
                     json.payload.devices.push({
                         id: d.id,
-                        error_code: `DEVICE_NOT_FOUND`,
+                        error_code: 'DEVICE_NOT_FOUND',
                         error_message: `device '${d.id})' not found`
                     });
                 }
@@ -193,7 +194,7 @@ module.exports = (RED) => {
         const path = buildPath(credentials.path);
         const pathRegexp = new RegExp(`^${path}`, 'g');
         for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
-            let route = RED.httpNode._router.stack[i];
+            const route = RED.httpNode._router.stack[i];
             if (route.route && route.route.path.match(pathRegexp)) {
                 // console.log(`${i} - delete - ${route.route.path}`);
                 RED.httpNode._router.stack.splice(i, 1);
