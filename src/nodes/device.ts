@@ -6,6 +6,33 @@ module.exports = (RED: NodeAPI) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const version: string = require('../../package.json').version.trim();
 
+  // helper
+  // https://github.com/lasthead0/yandex2mqtt/blob/master/device.js#L4
+  /* eslint-disable indent */
+  function convertToYandexValue(val: any, actType: string) {
+    switch (actType) {
+      case 'range':
+      case 'float': {
+        if (val == undefined) return Number(0.0);
+        try {
+          const value = parseFloat(val);
+          return isNaN(value) ? Number(0.0) : value;
+        } catch (e) {
+          return Number(0.0);
+        }
+      }
+      case 'toggle':
+      case 'on_off': {
+        if (val == undefined) return false;
+        if (['true', 'on', '1'].indexOf(String(val).toLowerCase()) != -1) return true;
+        else return false;
+      }
+      default:
+        return val;
+    }
+  }
+  /* eslint-enable indent */
+
   RED.nodes.registerType('alice-sh-device', function (this: any, config: any) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
@@ -38,31 +65,6 @@ module.exports = (RED: NodeAPI) => {
     self.onState = function (object: any) {
       self.emit('onState', object);
     };
-
-    // helper
-    // https://github.com/lasthead0/yandex2mqtt/blob/master/device.js#L4
-    function convertToYandexValue(val: any, actType: string) {
-      switch (actType) {
-        case 'range':
-        case 'float': {
-          if (val == undefined) return Number(0.0);
-          try {
-            const value = parseFloat(val);
-            return isNaN(value) ? Number(0.0) : value;
-          } catch (e) {
-            return Number(0.0);
-          }
-        }
-        case 'toggle':
-        case 'on_off': {
-          if (val == undefined) return false;
-          if (['true', 'on', '1'].indexOf(String(val).toLowerCase()) != -1) return true;
-          else return false;
-        }
-        default:
-          return val;
-      }
-    }
 
     // capabilities
     self.findCapability = function (type: string, instance: any) {
