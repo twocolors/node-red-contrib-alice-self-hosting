@@ -21,7 +21,7 @@ module.exports = (RED: NodeAPI) => {
   const validatorMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
     const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
     if (request_id && token) return next();
-    return res.sendStatus(404);
+    return res.sendStatus(400);
   };
   const authenticationMiddleware = (node: NodeServiceType) => {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -56,12 +56,9 @@ module.exports = (RED: NodeAPI) => {
       const token: string | undefined = req.get('Authorization')?.split(' ')[1];
       const key: string = `${token}-${node.id}`;
 
-      if (cache.get(key)) {
-        cache.del(key);
-        return res.sendStatus(200);
-      }
+      if (cache.get(key)) cache.del(key);
 
-      return res.sendStatus(404);
+      return res.sendStatus(200);
     };
   };
   const devices = (node: NodeServiceType) => {

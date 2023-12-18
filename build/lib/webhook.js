@@ -28,7 +28,7 @@ module.exports = (RED) => {
         const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
         if (request_id && token)
             return next();
-        return res.sendStatus(404);
+        return res.sendStatus(400);
     };
     const authenticationMiddleware = (node) => {
         return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -62,11 +62,9 @@ module.exports = (RED) => {
             const cache = node.cache;
             const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
             const key = `${token}-${node.id}`;
-            if (cache.get(key)) {
+            if (cache.get(key))
                 cache.del(key);
-                return res.sendStatus(200);
-            }
-            return res.sendStatus(404);
+            return res.sendStatus(200);
         };
     };
     const devices = (node) => {
