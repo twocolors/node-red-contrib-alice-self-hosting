@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const status_1 = require("../lib/status");
-const util_1 = require("util");
 module.exports = (RED) => {
     RED.nodes.registerType('alice-sh-range', function (config) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -87,21 +86,17 @@ module.exports = (RED) => {
             const payload = Number(msg.payload.toFixed(2));
             if (value == payload)
                 return;
-            let text = payload && typeof payload !== 'object' ? String(payload) : (0, util_1.inspect)(payload);
-            if (text && text.length > 32) {
-                text = `${text.substring(0, 32)}...`;
-            }
-            self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: text }, 3000);
+            self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: payload }, 3000);
             device.updateState(payload, ctype, instance);
             try {
                 yield device.updateStateDevice();
                 value = payload;
                 device.cache.set(keyCache, value);
-                self.statusHelper.set({
+                setTimeout(() => self.statusHelper.set({
                     fill: 'blue',
                     shape: 'ring',
                     text: 'Ok'
-                }, 3000);
+                }, 3000), 3000);
             }
             catch (error) {
                 device.updateState(value, ctype, instance);
@@ -132,6 +127,7 @@ module.exports = (RED) => {
                     type: object === null || object === void 0 ? void 0 : object.type,
                     instance: (_g = object === null || object === void 0 ? void 0 : object.state) === null || _g === void 0 ? void 0 : _g.instance
                 });
+                self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: value }, 3000);
                 if (reportable) {
                     device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
                 }

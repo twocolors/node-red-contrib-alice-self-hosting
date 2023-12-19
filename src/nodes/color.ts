@@ -1,7 +1,6 @@
 import {NodeAPI} from 'node-red';
 import {NodeDeviceType} from '../lib/types';
 import {Status} from '../lib/status';
-import {inspect} from 'util';
 
 module.exports = (RED: NodeAPI) => {
   RED.nodes.registerType('alice-sh-color', function (this: any, config: any) {
@@ -127,11 +126,7 @@ module.exports = (RED: NodeAPI) => {
 
       if (value == payload) return;
 
-      let text: string = payload && typeof payload !== 'object' ? String(payload) : inspect(payload);
-      if (text && text.length > 32) {
-        text = `${text.substring(0, 32)}...`;
-      }
-      self.statusHelper.set({fill: 'yellow', shape: 'dot', text: text}, 3000);
+      self.statusHelper.set({fill: 'yellow', shape: 'dot', text: payload}, 3000);
 
       device.updateState(payload, ctype, instance);
 
@@ -141,12 +136,16 @@ module.exports = (RED: NodeAPI) => {
         value = payload;
         device.cache.set(keyCache, value);
 
-        self.statusHelper.set(
-          {
-            fill: 'blue',
-            shape: 'ring',
-            text: 'Ok'
-          },
+        setTimeout(
+          () =>
+            self.statusHelper.set(
+              {
+                fill: 'blue',
+                shape: 'ring',
+                text: 'Ok'
+              },
+              3000
+            ),
           3000
         );
       } catch (error: any) {
@@ -177,6 +176,8 @@ module.exports = (RED: NodeAPI) => {
           type: object?.type,
           instance: object?.state?.instance
         });
+
+        self.statusHelper.set({fill: 'yellow', shape: 'dot', text: value}, 3000);
 
         if (reportable) {
           device.updateStateDevice().catch(error => self.error(`updateStateDevice: ${error}`));
