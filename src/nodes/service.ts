@@ -4,6 +4,8 @@ import NanoCache from 'nano-cache';
 const http = require('http');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const express = require('express');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bodyParser = require('body-parser');
 
 module.exports = (RED: NodeAPI) => {
   const credentialsValidator = function (credentials: any) {
@@ -40,6 +42,10 @@ module.exports = (RED: NodeAPI) => {
 
         if (config.port && config.port != RED.settings.uiPort) {
           self.app = express();
+          // parse application/x-www-form-urlencoded
+          self.app.use(bodyParser.urlencoded({extended: false}));
+          // parse application/json
+          self.app.use(bodyParser.json());
           self.server = http.createServer(self.app).listen(config.port);
         }
 

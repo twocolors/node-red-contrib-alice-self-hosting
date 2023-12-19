@@ -8,6 +8,8 @@ const nano_cache_1 = __importDefault(require("nano-cache"));
 const http = require('http');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const express = require('express');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bodyParser = require('body-parser');
 module.exports = (RED) => {
     const credentialsValidator = function (credentials) {
         if (!(credentials === null || credentials === void 0 ? void 0 : credentials.skill_id)) {
@@ -36,6 +38,10 @@ module.exports = (RED) => {
             credentialsValidator(self.credentials);
             if (config.port && config.port != RED.settings.uiPort) {
                 self.app = express();
+                // parse application/x-www-form-urlencoded
+                self.app.use(bodyParser.urlencoded({ extended: false }));
+                // parse application/json
+                self.app.use(bodyParser.json());
                 self.server = http.createServer(self.app).listen(config.port);
             }
             self.cache = cache;
