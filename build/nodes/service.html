@@ -43,8 +43,8 @@
       function _path(path) {
         $('#node-config-input-path').val(path);
 
-        const port = $('#node-config-input-port').val();
-        let webhook = window.location.protocol + window.location.hostname + ':' + port + '/' + path + '/webhook';
+        const port = $('#node-config-input-port').val() || 1880;
+        let webhook = window.location.protocol + '//' + window.location.hostname + ':' + port + '/' + path + '/webhook';
         $('#webhook').html('<a target="_blank" href="' + webhook + '">' + webhook + '</a>');
       }
     }
@@ -100,7 +100,7 @@
       >
     </dd>
     <dt class="required">Port<span class="property-type">number</span></dt>
-    <dd>Webhook port url for Yandex Dialogs</dd>
+    <dd>Webhook port url for Yandex Dialogs, port range from 1024 to 60000</dd>
     <dt class="required">Path<span class="property-type">string</span></dt>
     <dd>Webhook path url for Yandex Dialogs</dd>
   </dl>
