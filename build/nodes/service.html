@@ -2,7 +2,15 @@
   RED.nodes.registerType('alice-sh-service', {
     category: 'config',
     defaults: {
-      name: {}
+      name: {},
+      port: {
+        type: 'text',
+        value: '1880',
+        validate: function (v) {
+          let value = parseInt(v);
+          return value >= 1024 && value <= 60000;
+        }
+      }
     },
     credentials: {
       skill_id: {type: 'text', value: '', required: true},
@@ -34,7 +42,9 @@
 
       function _path(path) {
         $('#node-config-input-path').val(path);
-        let webhook = window.location.origin + '/' + path + '/webhook';
+
+        const port = $('#node-config-input-port').val();
+        let webhook = window.location.protocol + window.location.hostname + ':' + port + '/' + path + '/webhook';
         $('#webhook').html('<a target="_blank" href="' + webhook + '">' + webhook + '</a>');
       }
     }
@@ -58,8 +68,13 @@
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-path"><i class="fa fa-globe"></i> Path Url</label>
-    <input type="text" id="node-config-input-path" placeholder="Path Url" style="width: auto;" />
+    <label for="node-config-input-port"><i class="fa fa-random"></i> Port</label>
+    <input type="text" id="node-config-input-port" placeholder="Webhook Port" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-path"><i class="fa fa-globe"></i> Path</label>
+    <input type="text" id="node-config-input-path" placeholder="Webhook Path" style="width: auto;" />
     <button id="set_path" class="ui-button">Set</button>
   </div>
 
@@ -84,7 +99,9 @@
         >more</a
       >
     </dd>
-    <dt class="required">Path Url<span class="property-type">string</span></dt>
+    <dt class="required">Port<span class="property-type">number</span></dt>
+    <dd>Webhook port url for Yandex Dialogs</dd>
+    <dt class="required">Path<span class="property-type">string</span></dt>
     <dd>Webhook path url for Yandex Dialogs</dd>
   </dl>
 </script>

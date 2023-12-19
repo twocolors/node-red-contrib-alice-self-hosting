@@ -178,17 +178,19 @@ module.exports = (RED: NodeAPI) => {
       middleware: `${path}/v1.0/user/`
     };
 
+    const app: express.Express = self.app || RED.httpNode;
+
     // middleware
-    // RED.httpNode.use(route.base, _logMiddleware); // log
-    RED.httpNode.use(route.middleware, validatorMiddleware); // validatorMiddleware
-    RED.httpNode.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
+    // app.use(route.base, _logMiddleware); // log
+    app.use(route.middleware, validatorMiddleware); // validatorMiddleware
+    app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
     // route
-    RED.httpNode.get(route.base, pong);
-    RED.httpNode.head(route.pong, pong);
-    RED.httpNode.post(route.unlink, unlink(self));
-    RED.httpNode.get(route.devices, devices(self));
-    RED.httpNode.post(route.query, query(self));
-    RED.httpNode.post(route.action, action(self));
+    app.get(route.base, pong);
+    app.head(route.pong, pong);
+    app.post(route.unlink, unlink(self));
+    app.get(route.devices, devices(self));
+    app.post(route.query, query(self));
+    app.post(route.action, action(self));
   };
 
   const unpublish = function (self: NodeServiceType) {

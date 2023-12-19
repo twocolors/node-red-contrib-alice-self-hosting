@@ -1,8 +1,10 @@
 import {Node} from 'node-red';
 import NanoCache from 'nano-cache';
+import {Express} from 'express';
 
 export type NodeServiceType = Node & {
   cache: NanoCache;
+  app: Express;
 };
 
 export type NodeDeviceType = Node & {

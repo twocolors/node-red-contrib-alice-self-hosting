@@ -1,5 +1,9 @@
 import {NodeAPI} from 'node-red';
 import NanoCache from 'nano-cache';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const http = require('http');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const express = require('express');
 
 module.exports = (RED: NodeAPI) => {
   const credentialsValidator = function (credentials: any) {
@@ -31,10 +35,16 @@ module.exports = (RED: NodeAPI) => {
       self.config = config;
       RED.nodes.createNode(self, config);
 
-      self.cache = cache;
-
       try {
         credentialsValidator(self.credentials);
+
+        if (config.port && config.port != RED.settings.uiPort) {
+          self.app = express();
+          self.server = http.createServer(self.app).listen(config.port);
+        }
+
+        self.cache = cache;
+
         webhook.publish(self);
       } catch (error: any) {
         self.error(error);
@@ -42,8 +52,12 @@ module.exports = (RED: NodeAPI) => {
       }
 
       self.on('close', function (removed: any, done: () => any) {
-        self.cache.clear();
-        webhook.unpublish(self);
+        if (self.cache) self.cache.clear();
+        if (self.server) {
+          self.server.close();
+        } else {
+          webhook.unpublish(self);
+        }
         done();
       });
     },

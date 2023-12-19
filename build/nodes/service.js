@@ -4,6 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const nano_cache_1 = __importDefault(require("nano-cache"));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const http = require('http');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const express = require('express');
 module.exports = (RED) => {
     const credentialsValidator = function (credentials) {
         if (!(credentials === null || credentials === void 0 ? void 0 : credentials.skill_id)) {
@@ -28,9 +32,13 @@ module.exports = (RED) => {
         const self = this;
         self.config = config;
         RED.nodes.createNode(self, config);
-        self.cache = cache;
         try {
             credentialsValidator(self.credentials);
+            if (config.port && config.port != RED.settings.uiPort) {
+                self.app = express();
+                self.server = http.createServer(self.app).listen(config.port);
+            }
+            self.cache = cache;
             webhook.publish(self);
         }
         catch (error) {
@@ -38,8 +46,14 @@ module.exports = (RED) => {
             return;
         }
         self.on('close', function (removed, done) {
-            self.cache.clear();
-            webhook.unpublish(self);
+            if (self.cache)
+                self.cache.clear();
+            if (self.server) {
+                self.server.close();
+            }
+            else {
+                webhook.unpublish(self);
+            }
             done();
         });
     }, {
