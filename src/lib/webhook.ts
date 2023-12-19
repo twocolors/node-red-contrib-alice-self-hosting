@@ -88,6 +88,8 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.devices;
 
+      if (!devices) return res.sendStatus(400);
+
       const json: any = {
         request_id: request_id,
         payload: {
@@ -116,6 +118,8 @@ module.exports = (RED: NodeAPI) => {
     return (req: express.Request, res: express.Response) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.payload?.devices;
+
+      if (!devices) return res.sendStatus(400);
 
       const json: any = {
         request_id: request_id,

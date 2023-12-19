@@ -92,6 +92,8 @@ module.exports = (RED) => {
             var _a;
             const request_id = req.get('X-Request-Id');
             const devices = (_a = req.body) === null || _a === void 0 ? void 0 : _a.devices;
+            if (!devices)
+                return res.sendStatus(400);
             const json = {
                 request_id: request_id,
                 payload: {
@@ -121,6 +123,8 @@ module.exports = (RED) => {
             var _a, _b;
             const request_id = req.get('X-Request-Id');
             const devices = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.devices;
+            if (!devices)
+                return res.sendStatus(400);
             const json = {
                 request_id: request_id,
                 payload: {
