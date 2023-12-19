@@ -46,10 +46,17 @@ const Package = require('../../package.json');
 // i know, i fix 5xx from response (Yandex),
 // but make more 5xx for other ...
 const userAgent = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
+const _error = function (error) {
+    var _a, _b, _c, _d, _e;
+    let text = `${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - ${error.message}`;
+    if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) && typeof ((_c = error.response) === null || _c === void 0 ? void 0 : _c.data) === 'object') {
+        text = `${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} - ${(0, util_1.inspect)((_e = error.response) === null || _e === void 0 ? void 0 : _e.data)}`;
+    }
+    return text;
+};
 exports.Api = {
     // https://yandex.ru/dev/id/doc/ru/user-information
     login: (token) => __awaiter(void 0, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e;
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 3,
             retryDelay: retryCount => retryCount * 75,
@@ -69,28 +76,22 @@ exports.Api = {
             return yield axios_1.default.request(_options);
         }
         catch (e) {
-            const error = e;
-            let msg = `${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - ${error.message}`;
-            if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) && typeof ((_c = error.response) === null || _c === void 0 ? void 0 : _c.data) === 'object') {
-                msg = `${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} - ${(0, util_1.inspect)((_e = error.response) === null || _e === void 0 ? void 0 : _e.data)}`;
-            }
-            throw new Error(msg);
+            throw new Error(_error(e));
         }
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
     callback_state: (service, device) => __awaiter(void 0, void 0, void 0, function* () {
-        var _f, _g, _h, _j, _k;
         const credentials = service.credentials;
         const ts = Date.now() / 1000;
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 10,
-            retryDelay: retryCount => retryCount * 75,
+            retryDelay: retryCount => retryCount * 100,
             retryCondition: axios_retry_1.isRetryableError,
             shouldResetTimeout: true
         });
         const _options = {
             method: 'POST',
-            timeout: 750,
+            timeout: 1000,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,
@@ -109,12 +110,7 @@ exports.Api = {
             return yield axios_1.default.request(_options);
         }
         catch (e) {
-            const error = e;
-            let msg = `${(_f = error.response) === null || _f === void 0 ? void 0 : _f.status} - ${error.message}`;
-            if (((_g = error.response) === null || _g === void 0 ? void 0 : _g.data) && typeof ((_h = error.response) === null || _h === void 0 ? void 0 : _h.data) === 'object') {
-                msg = `${(_j = error.response) === null || _j === void 0 ? void 0 : _j.status} - ${(0, util_1.inspect)((_k = error.response) === null || _k === void 0 ? void 0 : _k.data)}`;
-            }
-            throw new Error(msg);
+            throw new Error(_error(e));
         }
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -143,13 +139,8 @@ exports.Api = {
                 }
             }
         };
-        return axios_1.default.request(_options).catch((error) => {
-            var _a, _b, _c, _d, _e;
-            let msg = `${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - ${error.message}`;
-            if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) && typeof ((_c = error.response) === null || _c === void 0 ? void 0 : _c.data) === 'object') {
-                msg = `${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} - ${(0, util_1.inspect)((_e = error.response) === null || _e === void 0 ? void 0 : _e.data)}`;
-            }
-            throw new Error(msg);
+        return axios_1.default.request(_options).catch((e) => {
+            throw new Error(_error(e));
         });
     }
 };

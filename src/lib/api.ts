@@ -12,6 +12,14 @@ const Package: any = require('../../package.json');
 
 const userAgent = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 
+const _error = function (error: AxiosError) {
+  let text = `${error.response?.status} - ${error.message}`;
+  if (error.response?.data && typeof error.response?.data === 'object') {
+    text = `${error.response?.status} - ${inspect(error.response?.data)}`;
+  }
+  return text;
+};
+
 export const Api: {[key: string]: any} = {
   // https://yandex.ru/dev/id/doc/ru/user-information
   login: async (token: string) => {
@@ -35,12 +43,7 @@ export const Api: {[key: string]: any} = {
     try {
       return await axios.request(_options);
     } catch (e: any) {
-      const error = e as AxiosError;
-      let msg = `${error.response?.status} - ${error.message}`;
-      if (error.response?.data && typeof error.response?.data === 'object') {
-        msg = `${error.response?.status} - ${inspect(error.response?.data)}`;
-      }
-      throw new Error(msg);
+      throw new Error(_error(e));
     }
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
@@ -50,14 +53,14 @@ export const Api: {[key: string]: any} = {
 
     axiosRetry(axios, {
       retries: 10,
-      retryDelay: retryCount => retryCount * 75,
+      retryDelay: retryCount => retryCount * 100,
       retryCondition: isRetryableError,
       shouldResetTimeout: true
     });
 
     const _options = {
       method: 'POST',
-      timeout: 750,
+      timeout: 1000,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
         Authorization: `OAuth ${credentials.oauth_token}`,
@@ -76,12 +79,7 @@ export const Api: {[key: string]: any} = {
     try {
       return await axios.request(_options);
     } catch (e: any) {
-      const error = e as AxiosError;
-      let msg = `${error.response?.status} - ${error.message}`;
-      if (error.response?.data && typeof error.response?.data === 'object') {
-        msg = `${error.response?.status} - ${inspect(error.response?.data)}`;
-      }
-      throw new Error(msg);
+      throw new Error(_error(e));
     }
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -113,12 +111,8 @@ export const Api: {[key: string]: any} = {
       }
     };
 
-    return axios.request(_options).catch((error: AxiosError) => {
-      let msg = `${error.response?.status} - ${error.message}`;
-      if (error.response?.data && typeof error.response?.data === 'object') {
-        msg = `${error.response?.status} - ${inspect(error.response?.data)}`;
-      }
-      throw new Error(msg);
+    return axios.request(_options).catch((e: AxiosError) => {
+      throw new Error(_error(e));
     });
   }
 };
