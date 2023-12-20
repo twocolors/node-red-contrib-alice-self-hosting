@@ -36,7 +36,9 @@
 
 > The 'S' in IoT stands for Security
 
-Нода **должна** быть спрятана за сервисами типа nginx, traefik, caddy, ngrok, cloudflare и т.п., в противном случае любой может **получить полный доступ** к Node-RED. Если этого не сделать, стоит добавить [авторизацию в Node-RED](https://nodered.org/docs/user-guide/runtime/securing-node-red#usernamepassword-based-authentication).
+Нода **должна** быть спрятана за правильно настроенными сервисами типа nginx, traefik, caddy, ngrok, localtunnel, cloudflare и т.п., в противном случае любой может **получить полный доступ** к Node-RED. В случае, если доступ снаружи предоставлен ко всему Node-RED, необходимо добавить [авторизацию](https://nodered.org/docs/user-guide/runtime/securing-node-red#usernamepassword-based-authentication).
+
+Существуют ноды для [ngrok](https://flows.nodered.org/node/node-red-contrib-ngrok) и [localtunnel](https://flows.nodered.org/node/node-red-contrib-localtunnel), которые позволяют получить доступ к установке Node-RED из интернета без проброса портов на роутере и установки дополнительного ПО. Самое простое решение — ngrok, так как помимо прочего даже в бесплатной версии позволяет автоматизировать получение TLS сертификата.
 
 # Требования
 
