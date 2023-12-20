@@ -20,7 +20,7 @@
 
 Проект представляет набор нод (узлов) Node-RED для работы с Алисой от Яндекса без сторонних сервисов, напрямую с домашнего сервера. С требованиями можно ознакомиться [здесь](#требования).
 
-![Работа ноды](https://github.com/twocolors/node-red-contrib-alice-self-hosting/assets/397799/7fb77e5c-f96e-424b-bc66-fa6ef2d5b365)
+<img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/node-demo.png">
 
 ## Благодарности
 
