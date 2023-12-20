@@ -72,7 +72,7 @@
 
 Обычная установка из палитры Node-RED. После установки перезапуск **обязателен**, как и после любого обновления.
 
-<img width="1022" alt="Снимок экрана 2023-12-20 в 10 34 48" src="https://github.com/ptath/node-red-contrib-alice-self-hosting/assets/397799/327e06c5-ca09-4db3-976f-03709eb4f4d8">
+<img width="1022" alt="Снимок экрана 2023-12-20 в 10 34 48" src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/node-install.png">
 
 ## Настройка доступа для Яндекса
 
