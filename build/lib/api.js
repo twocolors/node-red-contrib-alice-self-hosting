@@ -59,13 +59,13 @@ exports.Api = {
     login: (token) => __awaiter(void 0, void 0, void 0, function* () {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 3,
-            retryDelay: retryCount => retryCount * 75,
+            retryDelay: retryCount => retryCount * 150,
             retryCondition: axios_retry_1.isRetryableError,
             shouldResetTimeout: true
         });
         const _options = {
             method: 'GET',
-            timeout: 300,
+            timeout: 450,
             url: 'https://login.yandex.ru/info',
             headers: {
                 Authorization: `OAuth ${token}`,
@@ -84,14 +84,14 @@ exports.Api = {
         const credentials = service.credentials;
         const ts = Date.now() / 1000;
         (0, axios_retry_1.default)(axios_1.default, {
-            retries: 10,
-            retryDelay: retryCount => retryCount * 100,
+            retries: 8,
+            retryDelay: retryCount => retryCount * 200,
             retryCondition: axios_retry_1.isRetryableError,
             shouldResetTimeout: true
         });
         const _options = {
             method: 'POST',
-            timeout: 1000,
+            timeout: 1600,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,
@@ -118,8 +118,8 @@ exports.Api = {
         const credentials = service.credentials;
         const ts = Date.now() / 1000;
         (0, axios_retry_1.default)(axios_1.default, {
-            retries: 10,
-            retryDelay: retryCount => retryCount * 75,
+            retries: 5,
+            retryDelay: retryCount => retryCount * 150,
             retryCondition: axios_retry_1.isRetryableError,
             shouldResetTimeout: true
         });
