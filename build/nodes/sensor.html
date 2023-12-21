@@ -179,6 +179,51 @@
               .val('unit.density.mcg_m3')
               .prop('disabled', 'disabled');
             break;
+          case 'meter':
+            $('#node-input-unit')
+              .find('option')
+              .remove()
+              .end()
+              .append('<option value=""></option>')
+              .val('')
+              .prop('disabled', 'disabled');
+            break;
+          case 'water_meter':
+            $('#node-input-unit')
+              .find('option')
+              .remove()
+              .end()
+              .append('<option value="unit.cubic_meter">m3</option>')
+              .val('unit.cubic_meter')
+              .prop('disabled', 'disabled');
+            break;
+          case 'electricity_meter':
+            $('#node-input-unit')
+              .find('option')
+              .remove()
+              .end()
+              .append('<option value="unit.kilowatt_hour">Kilowatt-hour</option>')
+              .val('unit.kilowatt_hour')
+              .prop('disabled', 'disabled');
+            break;
+          case 'gas_meter':
+            $('#node-input-unit')
+              .find('option')
+              .remove()
+              .end()
+              .append('<option value="unit.cubic_meter">m3</option>')
+              .val('unit.cubic_meter')
+              .prop('disabled', 'disabled');
+            break;
+          case 'heat_meter':
+            $('#node-input-unit')
+              .find('option')
+              .remove()
+              .end()
+              .append('<option value="unit.gigacalorie">Gigacalorie (GCal)</option>')
+              .val('unit.gigacalorie')
+              .prop('disabled', 'disabled');
+            break;
           default:
             $('#node-input-unit').prop('disabled', 'disabled');
             break;
@@ -217,6 +262,11 @@
       <option value="tvoc">TVOC</option>
       <option value="voltage">Voltage</option>
       <option value="water_level">Water level</option>
+      <option value="meter">Smart Meter</option>
+      <option value="water_meter">Smart Water Meter</option>
+      <option value="electricity_meter">Smart Electricity Meter</option>
+      <option value="gas_meter">Smart Gas Meter</option>
+      <option value="heat_meter">Smart Heat Meter</option>
     </select>
   </div>
 
@@ -232,6 +282,10 @@
       <option value="unit.watt">Watt (W)</option>
       <option value="unit.illumination.lux">Lux (lx)</option>
       <option value="unit.density.mcg_m3">μg/m3</option>
+      <option value=""></option>
+      <option value="unit.cubic_meter">m3</option>
+      <option value="unit.kilowatt_hour">Kilowatt-hour</option>
+      <option value="unit.gigacalorie">Gigacalorie (GCal)</option>
     </select>
   </div>
 </script>
@@ -265,7 +319,14 @@
   <h3>References</h3>
   <ul>
     <li>
-      <a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-type-sensor.html">Yandex documentation</a>
+      <a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-type-sensor.html"
+        >Sensor - Yandex documentation</a
+      >
+    </li>
+    <li>
+      <a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-type-smart_meter.html"
+        >Smart Meter - Yandex documentation</a
+      >
     </li>
   </ul>
 </script>

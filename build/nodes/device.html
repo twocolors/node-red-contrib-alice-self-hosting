@@ -6,7 +6,7 @@
       service: {value: '', type: 'alice-sh-service'},
       description: {value: ''},
       room: {value: 'Туалет', required: true},
-      dtype: {value: 'devices.types.light', required: true},
+      dtype: {value: 'devices.types.light', required: true}
     },
     paletteLabel: 'device',
     label: function () {
@@ -67,26 +67,30 @@
       <option value="devices.types.sensor.illumination">Sensor illumination</option>
       <option value="devices.types.sensor.open">Sensor open</option>
       <option value="devices.types.sensor.climate">Sensor climate</option>
-      <option value="devices.types.sensor.water_leak">Sensor water_leak</option>
+      <option value="devices.types.sensor.water_leak">Sensor water leak</option>
       <option value="devices.types.sensor.button">Sensor button</option>
       <option value="devices.types.sensor.gas">Sensor gas</option>
       <option value="devices.types.sensor.smoke">Sensor smoke</option>
       <option value="devices.types.pet_drinking_fountain">Pet drinking fountain</option>
       <option value="devices.types.pet_feeder">Pet feeder</option>
       <option value="devices.types.other">Other</option>
+      <option value="devices.types.smart_meter">Smart meter</option>
+      <option value="devices.types.smart_meter.cold_water">Smart meter cold water</option>
+      <option value="devices.types.smart_meter.electricity">Smart meter electricity</option>
+      <option value="devices.types.smart_meter.gas">Smart meter gas</option>
+      <option value="devices.types.smart_meter.heat">Smart meter heat</option>
+      <option value="devices.types.smart_meter.hot_water">Smart meter hot water</option>
     </select>
   </div>
 </script>
 
 <script type="text/html" data-help-name="alice-sh-device">
   <p>Choose device type</p>
-  
+
   <h3>References</h3>
   <ul>
     <li>
-      <a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-types.html"
-        >Yandex documentation</a
-      >
+      <a href="https://yandex.ru/dev/dialogs/smart-home/doc/concepts/device-types.html">Yandex documentation</a>
     </li>
-  </ul>  
+  </ul>
 </script>
