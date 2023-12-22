@@ -1,0 +1,94 @@
+[
+    {
+        "id": "22a2f8813a3b0bc0",
+        "type": "inject",
+        "z": "5d4469ddd51b34d7",
+        "name": "Start tunnel",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "47732937ac79a054"
+            ]
+        ]
+    },
+    {
+        "id": "bb12c9398013aa26",
+        "type": "inject",
+        "z": "5d4469ddd51b34d7",
+        "name": "Stop tunnel",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 130,
+        "y": 180,
+        "wires": [
+            [
+                "47732937ac79a054"
+            ]
+        ]
+    },
+    {
+        "id": "5b580a8501350e4c",
+        "type": "debug",
+        "z": "5d4469ddd51b34d7",
+        "name": "debug ngrok node",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "47732937ac79a054",
+        "type": "function",
+        "z": "5d4469ddd51b34d7",
+        "name": "ngrok",
+        "func": "// ngrock javascript node 0.0.2\n// created for https://github.com/twocolors/node-red-contrib-alice-self-hosting\n// author https://t.me/alice_in_red_wonderland\n\n// --- node setup start\n\n// token from ngrok https://dashboard.ngrok.com/get-started/your-authtoken\nconst authtoken = \"\";\n// server and port ('localhost:1880' or '1880')\nconst addr = \"1880\";\n// static domain https://dashboard.ngrok.com/cloud-edge/domains\nconst domain = \"paste-your-domain.ngrok-free.app\";\n\n// --- stop edit below\n\n\n// system var\nconst session_metadata = `${node.id} - Node-RED`;\nconst cacheKey = `ngrok_${node.id}`;\n\nif (msg.payload === true || msg.payload == \"on\") {\n    if (global.get(cacheKey)) {\n        await ngrok.disconnect(global.get(cacheKey));\n        global.set(cacheKey, undefined);\n        node.status({ fill: \"red\", shape: \"ring\", text: \"disconnected\" });\n    } else {\n        node.status({ fill: \"blue\", shape: \"ring\", text: \"connecting\" });\n        const listener = await ngrok.forward({\n            addr,\n            authtoken,\n            domain,\n            session_metadata,\n        });\n        const url = listener.url();\n        if (url) {\n            node.status({ fill: \"green\", shape: \"dot\", text: url });\n            msg.payload = url;\n            global.set(cacheKey, url);\n        }\n    }\n} else if (msg.payload === false || msg.payload == \"off\") {\n    const url = global.get(cacheKey);\n    if (url) {\n        await ngrok.disconnect(url);\n        global.set(cacheKey, undefined);\n    }\n    node.status({ fill: \"red\", shape: \"ring\", text: \"disconnected\" });\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "ngrok",
+                "module": "@ngrok/ngrok"
+            }
+        ],
+        "x": 310,
+        "y": 160,
+        "wires": [
+            [
+                "5b580a8501350e4c"
+            ]
+        ]
+    }
+]
