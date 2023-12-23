@@ -76,8 +76,6 @@
 
 Это хорошее в своей простоте решение, так как снимает **все** вышеуказанные требования к белому IP-адресу, домену, настройке роутера и TLS-сертификата, существенно увеличивает безопасность. К минусам стоит отнести обязательное увеличение времени отклика Алисы из-за того, что данные передаются через сторонний сервер (минимум плюс 30-200 мсек), а также возникает зависимость от стабильности работы выбранного сервиса.
 
-Однако в настоящее время готового рабочего решения для Node-RED не существует.
-
 # Установка
 
 ## Установка ноды
@@ -102,7 +100,34 @@
 
 - Node-RED создает **WebHook URL**, через который и происходит общение с Алисой
 
-- возможно использование ngrock, localtunnel или аналогичного сервиса, но на данный момент указанный способ не рекомендуется, примеров нет. Стоит отметить что указанный способ *позволит избежать обязательного требования белого IP-адреса*.
+- возможно использование ngrock, localtunnel или аналогичного сервиса. Стоит отметить что указанный способ *позволит избежать обязательного требования белого IP-адреса*.
+
+## Использование туннеля (сторонние сервисы)
+
+### ngrok
+
+Специально для node-red-contrib-alice-self-hosting создан [ngrok flow для Node-RED](https://github.com/twocolors/node-red-contrib-alice-self-hosting/blob/master/addons/ngrock-flow.json). Не требует внешней установки пакетов и достаточно стабильно работает.
+
+<img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/ngrok-flow.png">
+
+Требует регистрации бесплатного аккаунта в сервисе [ngrok](https://dashboard.ngrok.com/), создания [постоянного домена](https://dashboard.ngrok.com/cloud-edge/domains) и [токена](https://dashboard.ngrok.com/get-started/your-authtoken). Так как в бесплатной версии доступны только один домен и один токен, рекомендуется зарегистрировать новый аккаунт ngrok для этой ноды.
+
+Вся настройка сводится к указанию данных в ноде (кубике) `ngrok`: необходимо заполнить `authtoken`, `addr` и `domain`
+
+```
+
+// token from ngrok https://dashboard.ngrok.com/get-started/your-authtoken
+const authtoken = "YOUR_TOKEN_HERE";
+// server and port ('localhost:1880' or '1880')
+const addr = "1880";
+// static domain https://dashboard.ngrok.com/cloud-edge/domains
+const domain = "YOUR_NGROK_DOMAIN_HERE.ngrok-free.app";
+
+```
+
+После этого сделать deploy и отправить "Start tunnel". **Внимание! Сразу после этого любой может получить доступ к Node-RED**, поэтому стоит озаботиться [настройкой авторизации](https://nodered.org/docs/user-guide/runtime/securing-node-red#usernamepassword-based-authentication) заранее.
+
+Необходимый для Яндекса **Endpoint URL** будет выглядеть как `https://YOUR_NGROK_DOMAIN_HERE.ngrok-free.app/abcd000000/webhook` (комбинация из домена ngrok и **WebHook URL** из настроек ноды). Так как выше мы указали порт Node-RED (1880), указывать его в **Endpoint URL** не требуется, ngrok пробрасывает его из 1880 в 443.
 
 ## Примеры настройки reverse proxy
 
