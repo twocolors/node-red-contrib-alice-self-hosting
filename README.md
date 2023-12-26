@@ -106,7 +106,7 @@
 
 ### ngrok
 
-Специально для node-red-contrib-alice-self-hosting создан [ngrok flow для Node-RED](https://github.com/twocolors/node-red-contrib-alice-self-hosting/blob/master/addons/ngrock-flow.json). Не требует внешней установки пакетов и достаточно стабильно работает.
+Специально для node-red-contrib-alice-self-hosting создан [ngrok flow для Node-RED](https://github.com/twocolors/node-red-contrib-alice-self-hosting/blob/master/examples/ngrock-flow.json). Не требует внешней установки пакетов и достаточно стабильно работает.
 
 <img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/ngrok-flow.png">
 
