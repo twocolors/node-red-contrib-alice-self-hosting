@@ -59,12 +59,16 @@
 
   <div class="form-row">
     <label for="node-config-input-skill_id"><i class="fa fa-key"></i> Skill Id</label>
-    <input type="text" id="node-config-input-skill_id" placeholder="Skill Id" />
+    <input type="text" id="node-config-input-skill_id" placeholder="XXXXXXXX-1234-4321-1234-XXXXXXXXXXXX" />
   </div>
 
   <div class="form-row">
     <label for="node-config-input-oauth_token"><i class="fa fa-key"></i> OAuth Token</label>
-    <input type="text" id="node-config-input-oauth_token" placeholder="OAuth Token" />
+    <input
+      type="text"
+      id="node-config-input-oauth_token"
+      placeholder="y0_XXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXX-XXXXXXXXXXXXX"
+    />
   </div>
 
   <div class="form-row">
@@ -76,6 +80,17 @@
     <label for="node-config-input-path"><i class="fa fa-globe"></i> Path</label>
     <input type="text" id="node-config-input-path" placeholder="Webhook Path" style="width: auto;" />
     <button id="set_path" class="ui-button">Set</button>
+  </div>
+
+  <div class="form-row">
+    <div class="form-tips">
+      Get your <b>OAuth Token</b> for Notification service
+      <a
+        target="_blank"
+        href="https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/resources-alerts.html?lang=en#resources-alerts__oauth"
+        >here</a
+      >
+    </div>
   </div>
 
   <div class="form-row">
@@ -95,6 +110,7 @@
     <dd>
       Get your OAuth Token for Notification service
       <a
+        target="_blank"
         href="https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/resources-alerts.html?lang=en#resources-alerts__oauth"
         >here</a
       >
