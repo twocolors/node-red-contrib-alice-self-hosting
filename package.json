@@ -30,7 +30,8 @@
       "color": "build/nodes/color.js",
       "mode": "build/nodes/mode.js",
       "sensor": "build/nodes/sensor.js",
-      "event": "build/nodes/event.js"
+      "event": "build/nodes/event.js",
+      "video": "build/nodes/video.js"
     }
   },
   "dependencies": {
