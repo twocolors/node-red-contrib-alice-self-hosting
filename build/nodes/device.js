@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("../lib/api");
 module.exports = (RED) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const version = require('../../package.json').version.trim();
+    const sw_version = require('../../package.json').version.trim();
+    const hw_version = RED.version();
     // helper
     // https://github.com/lasthead0/yandex2mqtt/blob/master/device.js#L4
     /* eslint-disable indent */
@@ -53,8 +54,9 @@ module.exports = (RED) => {
             type: config.dtype,
             device_info: {
                 manufacturer: 'Node-RED',
-                model: 'virtual device',
-                sw_version: version
+                model: 'Virtual Device',
+                sw_version,
+                hw_version
             },
             capabilities: [],
             properties: []

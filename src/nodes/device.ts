@@ -4,7 +4,8 @@ import {NodeServiceType} from '../lib/types';
 
 module.exports = (RED: NodeAPI) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const version: string = require('../../package.json').version.trim();
+  const sw_version: string = require('../../package.json').version.trim();
+  const hw_version: Promise<string> = RED.version();
 
   // helper
   // https://github.com/lasthead0/yandex2mqtt/blob/master/device.js#L4
@@ -54,8 +55,9 @@ module.exports = (RED: NodeAPI) => {
       type: config.dtype,
       device_info: {
         manufacturer: 'Node-RED',
-        model: 'virtual device',
-        sw_version: version
+        model: 'Virtual Device',
+        sw_version,
+        hw_version
       },
       capabilities: [],
       properties: []
