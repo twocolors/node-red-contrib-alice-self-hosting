@@ -135,10 +135,8 @@ module.exports = (RED: NodeAPI) => {
           const capabilities: any = [];
 
           d.capabilities.forEach((c: any) => {
-            // state device
-            device.onState(c);
-
-            capabilities.push({
+            const findCapability: any = device.findCapability(c.type, c.state.instance);
+            const capability: any = {
               type: c.type,
               state: {
                 instance: c.state.instance,
@@ -146,7 +144,25 @@ module.exports = (RED: NodeAPI) => {
                   status: 'DONE'
                 }
               }
-            });
+            };
+
+            if (findCapability) {
+              // state device
+              device.onState(c);
+
+              // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
+              if (c.type == 'devices.capabilities.video_stream') {
+                capability.state.value = findCapability.state.value;
+              }
+            } else {
+              capability.state.action_result = {
+                status: 'ERROR',
+                error_code: 'INVALID_ACTION',
+                error_message: `capability '${c.type}' with instance '${c.state.instance}' not found`
+              };
+            }
+
+            capabilities.push(capability);
           });
 
           json.payload.devices.push({
@@ -157,7 +173,7 @@ module.exports = (RED: NodeAPI) => {
           json.payload.devices.push({
             id: d.id,
             error_code: 'DEVICE_NOT_FOUND',
-            error_message: `device '${d.id})' not found`
+            error_message: `device '${d.id}' not found`
           });
         }
       });

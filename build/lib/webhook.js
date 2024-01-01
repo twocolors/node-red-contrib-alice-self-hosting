@@ -138,9 +138,8 @@ module.exports = (RED) => {
                 if ((device === null || device === void 0 ? void 0 : device.device) && ((_a = device === null || device === void 0 ? void 0 : device.config) === null || _a === void 0 ? void 0 : _a.service) == node.id) {
                     const capabilities = [];
                     d.capabilities.forEach((c) => {
-                        // state device
-                        device.onState(c);
-                        capabilities.push({
+                        const findCapability = device.findCapability(c.type, c.state.instance);
+                        const capability = {
                             type: c.type,
                             state: {
                                 instance: c.state.instance,
@@ -148,7 +147,23 @@ module.exports = (RED) => {
                                     status: 'DONE'
                                 }
                             }
-                        });
+                        };
+                        if (findCapability) {
+                            // state device
+                            device.onState(c);
+                            // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
+                            if (c.type == 'devices.capabilities.video_stream') {
+                                capability.state.value = findCapability.state.value;
+                            }
+                        }
+                        else {
+                            capability.state.action_result = {
+                                status: 'ERROR',
+                                error_code: 'INVALID_ACTION',
+                                error_message: `capability '${c.type}' with instance '${c.state.instance}' not found`
+                            };
+                        }
+                        capabilities.push(capability);
                     });
                     json.payload.devices.push({
                         id: d.id,
@@ -159,7 +174,7 @@ module.exports = (RED) => {
                     json.payload.devices.push({
                         id: d.id,
                         error_code: 'DEVICE_NOT_FOUND',
-                        error_message: `device '${d.id})' not found`
+                        error_message: `device '${d.id}' not found`
                     });
                 }
             });
