@@ -37,7 +37,7 @@ module.exports = (RED: NodeAPI) => {
     }
 
     // device not init
-    if (!device) return;
+    if (!device || !device.init) return;
     // init
     let instance: any;
     const parameters: any = {};

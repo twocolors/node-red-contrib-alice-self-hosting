@@ -7,6 +7,7 @@ export type NodeServiceType = Node & {
     config: {
         debug: boolean;
     };
+    init: boolean;
 };
 export type NodeDeviceType = Node & {
     config: any;
@@ -23,4 +24,5 @@ export type NodeDeviceType = Node & {
     updateStateDevice: () => Promise<void>;
     updateInfoDevice: () => Promise<void>;
     on(event: 'onState', object: any): void;
+    init: boolean;
 };

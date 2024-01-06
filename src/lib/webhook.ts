@@ -3,7 +3,7 @@ import express from 'express';
 import {NodeServiceType, NodeDeviceType} from './types';
 import {Api} from './api';
 import NanoCache from 'nano-cache';
-import morganBody from 'morgan-body';
+import MorganBody from 'morgan-body';
 
 module.exports = (RED: NodeAPI) => {
   // helper
@@ -198,7 +198,7 @@ module.exports = (RED: NodeAPI) => {
     const app: express.Express = self.app || RED.httpNode;
 
     // debug
-    if (self.config.debug) morganBody(app, {maxBodyLength: 10000});
+    if (self.config.debug) MorganBody(app, {maxBodyLength: 10000});
     // middleware
     app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware

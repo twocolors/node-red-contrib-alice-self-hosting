@@ -40,7 +40,7 @@ module.exports = (RED) => {
             return;
         }
         // device not init
-        if (!device)
+        if (!device || !device.init)
             return;
         // init
         let instance;

@@ -27,7 +27,7 @@ module.exports = (RED) => {
         // helpers
         self.statusHelper = new status_1.Status(self);
         // device not init
-        if (!device)
+        if (!device || !device.init)
             return;
         // init
         try {

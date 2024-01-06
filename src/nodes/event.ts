@@ -22,7 +22,7 @@ module.exports = (RED: NodeAPI) => {
     self.statusHelper = new Status(self);
 
     // device not init
-    if (!device) return;
+    if (!device || !device.init) return;
     // init
     const keyCache = `${self.id}-${ptype}-${instance}`;
     let value = device.cache.get(keyCache) || undefined;

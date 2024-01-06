@@ -35,7 +35,11 @@ module.exports = (RED: NodeAPI) => {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       self.config = config;
-      RED.nodes.createNode(self, config);
+
+      RED.nodes.createNode(this, config);
+      // vars
+      self.init = false;
+      self.cache = cache;
 
       try {
         credentialsValidator(self.credentials);
@@ -49,9 +53,9 @@ module.exports = (RED: NodeAPI) => {
           self.server = http.createServer(self.app).listen(config.port);
         }
 
-        self.cache = cache;
-
         webhook.publish(self);
+
+        self.init = true;
       } catch (error: any) {
         self.error(error);
         return;
@@ -63,6 +67,9 @@ module.exports = (RED: NodeAPI) => {
           self.server.close();
         } else {
           webhook.unpublish(self);
+        }
+        if (removed) {
+          self.init = false;
         }
         done();
       });

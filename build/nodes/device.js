@@ -41,10 +41,13 @@ module.exports = (RED) => {
         const self = this;
         self.config = config;
         RED.nodes.createNode(this, config);
+        // vars
         self.setMaxListeners(0);
-        // var
+        self.init = false;
         self.service = RED.nodes.getNode(config.service);
-        self.cache = self.service.cache;
+        // service not init
+        if (!self.service || !self.service.init)
+            return;
         // device init
         self.device = {
             id: self.id,
@@ -61,6 +64,9 @@ module.exports = (RED) => {
             capabilities: [],
             properties: []
         };
+        // vars
+        self.cache = self.service.cache;
+        self.init = true;
         // emit to state
         self.onState = function (object) {
             self.emit('onState', object);
@@ -136,6 +142,12 @@ module.exports = (RED) => {
         self.updateStateDevice = () => api_1.Api.callback_state(self.service, self.device);
         // info device
         self.updateInfoDevice = () => api_1.Api.callback_discovery(self.service);
+        self.on('close', function (removed, done) {
+            if (removed) {
+                self.init = false;
+            }
+            done();
+        });
     });
 };
 //# sourceMappingURL=device.js.map

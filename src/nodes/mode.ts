@@ -33,7 +33,7 @@ module.exports = (RED: NodeAPI) => {
     }
 
     // device not init
-    if (!device) return;
+    if (!device || !device.init) return;
     // init
     const keyCache = `${self.id}-${ctype}-${instance}`;
     let value = device.cache.get(keyCache) || String(modes[0]);

@@ -23,7 +23,7 @@ module.exports = (RED: NodeAPI) => {
     self.statusHelper = new Status(self);
 
     // device not init
-    if (!device) return;
+    if (!device || !device.init) return;
 
     // init
     try {
