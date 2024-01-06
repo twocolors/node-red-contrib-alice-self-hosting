@@ -53,7 +53,7 @@ module.exports = (RED: NodeAPI) => {
         ptype,
         instance
       );
-    } catch (error) {
+    } catch (error: any) {
       self.error(error);
       self.statusHelper.set({
         fill: 'red',

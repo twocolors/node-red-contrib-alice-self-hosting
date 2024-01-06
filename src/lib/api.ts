@@ -42,8 +42,8 @@ export const Api: {[key: string]: any} = {
 
     try {
       return await axios.request(_options);
-    } catch (e: any) {
-      throw new Error(_error(e));
+    } catch (error: any) {
+      throw new Error(_error(error));
     }
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
@@ -78,8 +78,8 @@ export const Api: {[key: string]: any} = {
 
     try {
       return await axios.request(_options);
-    } catch (e: any) {
-      throw new Error(_error(e));
+    } catch (error: any) {
+      throw new Error(_error(error));
     }
   },
   // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -111,8 +111,8 @@ export const Api: {[key: string]: any} = {
       }
     };
 
-    return axios.request(_options).catch((e: AxiosError) => {
-      throw new Error(_error(e));
+    return axios.request(_options).catch((error: AxiosError) => {
+      throw new Error(_error(error));
     });
   }
 };

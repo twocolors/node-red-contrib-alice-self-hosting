@@ -16,7 +16,7 @@ module.exports = (RED: NodeAPI) => {
       throw new Error('Parameter `OAuth Token` is required');
     }
     if (!credentials?.path) {
-      throw new Error('Parameter `Path Url` is required');
+      throw new Error('Parameter `Path` is required');
     }
   };
 

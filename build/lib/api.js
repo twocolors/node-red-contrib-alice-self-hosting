@@ -75,8 +75,8 @@ exports.Api = {
         try {
             return yield axios_1.default.request(_options);
         }
-        catch (e) {
-            throw new Error(_error(e));
+        catch (error) {
+            throw new Error(_error(error));
         }
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
@@ -109,8 +109,8 @@ exports.Api = {
         try {
             return yield axios_1.default.request(_options);
         }
-        catch (e) {
-            throw new Error(_error(e));
+        catch (error) {
+            throw new Error(_error(error));
         }
     }),
     // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -139,8 +139,8 @@ exports.Api = {
                 }
             }
         };
-        return axios_1.default.request(_options).catch((e) => {
-            throw new Error(_error(e));
+        return axios_1.default.request(_options).catch((error) => {
+            throw new Error(_error(error));
         });
     }
 };

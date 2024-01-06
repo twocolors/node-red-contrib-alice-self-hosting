@@ -88,7 +88,7 @@ module.exports = (RED: NodeAPI) => {
         ctype,
         instance
       );
-    } catch (error) {
+    } catch (error: any) {
       self.error(error);
       self.statusHelper.set({
         fill: 'red',

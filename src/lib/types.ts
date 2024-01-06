@@ -5,6 +5,9 @@ import {Express} from 'express';
 export type NodeServiceType = Node & {
   cache: NanoCache;
   app: Express;
+  config: {
+    debug: boolean;
+  };
 };
 
 export type NodeDeviceType = Node & {

@@ -3,6 +3,7 @@ import express from 'express';
 import {NodeServiceType, NodeDeviceType} from './types';
 import {Api} from './api';
 import NanoCache from 'nano-cache';
+import morganBody from 'morgan-body';
 
 module.exports = (RED: NodeAPI) => {
   // helper
@@ -12,16 +13,12 @@ module.exports = (RED: NodeAPI) => {
 
   // middleware
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _logMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
-    if (req.originalUrl) {
-      console.log(`${req.method} - ${req.originalUrl}`);
-    }
-    return next();
-  };
-  const validatorMiddleware = function (req: express.Request, res: express.Response, next: express.NextFunction) {
-    const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-    if (request_id && token) return next();
-    return res.sendStatus(400);
+  const validatorMiddleware = (node: NodeServiceType) => {
+    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
+      if (request_id && token) return next();
+      return res.status(400).json({error: 'not validate request_id or token'});
+    };
   };
   const authenticationMiddleware = (node: NodeServiceType) => {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -38,10 +35,10 @@ module.exports = (RED: NodeAPI) => {
         if (response?.data?.id) {
           cache.set(key, response.data);
         } else {
-          return res.sendStatus(401);
+          return res.status(401).json({error: response?.data});
         }
-      } catch (error) {
-        return res.sendStatus(401);
+      } catch (error: any) {
+        return res.status(401).json({error: error.message});
       }
 
       return next();
@@ -88,7 +85,7 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.devices;
 
-      if (!devices) return res.sendStatus(400);
+      if (!devices) return res.status(400).json({error: 'devices is empty'});
 
       const json: any = {
         request_id: request_id,
@@ -119,7 +116,7 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.payload?.devices;
 
-      if (!devices) return res.sendStatus(400);
+      if (!devices) return res.status(400).json({error: 'devices is empty'});
 
       const json: any = {
         request_id: request_id,
@@ -200,9 +197,10 @@ module.exports = (RED: NodeAPI) => {
 
     const app: express.Express = self.app || RED.httpNode;
 
+    // debug
+    if (self.config.debug) morganBody(app, {maxBodyLength: 10000});
     // middleware
-    // app.use(route.base, _logMiddleware); // log
-    app.use(route.middleware, validatorMiddleware); // validatorMiddleware
+    app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
     // route
     app.get(route.base, pong);
@@ -221,7 +219,6 @@ module.exports = (RED: NodeAPI) => {
     for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
       const route = RED.httpNode._router.stack[i];
       if (route.route && route.route.path.match(pathRegexp)) {
-        // console.log(`${i} - delete - ${route.route.path}`);
         RED.httpNode._router.stack.splice(i, 1);
       }
     }

@@ -10,7 +10,8 @@
           let value = parseInt(v);
           return value >= 1024 && value <= 60000;
         }
-      }
+      },
+      debug: {value: false}
     },
     credentials: {
       skill_id: {type: 'text', value: '', required: true},
@@ -80,6 +81,11 @@
     <label for="node-config-input-path"><i class="fa fa-globe"></i> Path</label>
     <input type="text" id="node-config-input-path" placeholder="Webhook Path" style="width: auto;" />
     <button id="set_path" class="ui-button">Set</button>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-debug"><i class="fa fa-file-o"></i> Debug</label>
+    <input type="checkbox" id="node-config-input-debug" style="display:inline-block; width:22px; vertical-align:top;" autocomplete="off">
   </div>
 
   <div class="form-row">

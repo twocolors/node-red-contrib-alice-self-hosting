@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("./api");
+const morgan_body_1 = __importDefault(require("morgan-body"));
 module.exports = (RED) => {
     // helper
     const buildPath = function (path) {
@@ -17,18 +21,14 @@ module.exports = (RED) => {
     };
     // middleware
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _logMiddleware = function (req, res, next) {
-        if (req.originalUrl) {
-            console.log(`${req.method} - ${req.originalUrl}`);
-        }
-        return next();
-    };
-    const validatorMiddleware = function (req, res, next) {
-        var _a;
-        const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
-        if (request_id && token)
-            return next();
-        return res.sendStatus(400);
+    const validatorMiddleware = (node) => {
+        return (req, res, next) => {
+            var _a;
+            const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
+            if (request_id && token)
+                return next();
+            return res.status(400).json({ error: 'not validate request_id or token' });
+        };
     };
     const authenticationMiddleware = (node) => {
         return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,11 +45,11 @@ module.exports = (RED) => {
                     cache.set(key, response.data);
                 }
                 else {
-                    return res.sendStatus(401);
+                    return res.status(401).json({ error: response === null || response === void 0 ? void 0 : response.data });
                 }
             }
             catch (error) {
-                return res.sendStatus(401);
+                return res.status(401).json({ error: error.message });
             }
             return next();
         });
@@ -93,7 +93,7 @@ module.exports = (RED) => {
             const request_id = req.get('X-Request-Id');
             const devices = (_a = req.body) === null || _a === void 0 ? void 0 : _a.devices;
             if (!devices)
-                return res.sendStatus(400);
+                return res.status(400).json({ error: 'devices is empty' });
             const json = {
                 request_id: request_id,
                 payload: {
@@ -124,7 +124,7 @@ module.exports = (RED) => {
             const request_id = req.get('X-Request-Id');
             const devices = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.devices;
             if (!devices)
-                return res.sendStatus(400);
+                return res.status(400).json({ error: 'devices is empty' });
             const json = {
                 request_id: request_id,
                 payload: {
@@ -196,9 +196,11 @@ module.exports = (RED) => {
             middleware: `${path}/v1.0/user/`
         };
         const app = self.app || RED.httpNode;
+        // debug
+        if (self.config.debug)
+            (0, morgan_body_1.default)(app, { maxBodyLength: 10000 });
         // middleware
-        // app.use(route.base, _logMiddleware); // log
-        app.use(route.middleware, validatorMiddleware); // validatorMiddleware
+        app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
         app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
         // route
         app.get(route.base, pong);
@@ -215,7 +217,6 @@ module.exports = (RED) => {
         for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
             const route = RED.httpNode._router.stack[i];
             if (route.route && route.route.path.match(pathRegexp)) {
-                // console.log(`${i} - delete - ${route.route.path}`);
                 RED.httpNode._router.stack.splice(i, 1);
             }
         }

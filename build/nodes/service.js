@@ -19,7 +19,7 @@ module.exports = (RED) => {
             throw new Error('Parameter `OAuth Token` is required');
         }
         if (!(credentials === null || credentials === void 0 ? void 0 : credentials.path)) {
-            throw new Error('Parameter `Path Url` is required');
+            throw new Error('Parameter `Path` is required');
         }
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
