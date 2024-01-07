@@ -4,12 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const nano_cache_1 = __importDefault(require("nano-cache"));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const http = require('http');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const express = require('express');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bodyParser = require('body-parser');
 module.exports = (RED) => {
     const credentialsValidator = function (credentials) {
         if (!(credentials === null || credentials === void 0 ? void 0 : credentials.skill_id)) {
@@ -22,13 +16,13 @@ module.exports = (RED) => {
             throw new Error('Parameter `Path` is required');
         }
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const webhook = require('../lib/webhook')(RED);
     // use cache (14 days and 4 MB)
     const cache = new nano_cache_1.default({
         ttl: 1000 * 60 * 60 * 24 * 14,
         maxEvictBytes: 4 * nano_cache_1.default.SIZE.MB
     });
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const webhook = require('../lib/webhook')(RED);
     RED.nodes.registerType('alice-sh-service', function (config) {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const self = this;
@@ -39,14 +33,6 @@ module.exports = (RED) => {
         self.cache = cache;
         try {
             credentialsValidator(self.credentials);
-            if (config.port && config.port != RED.settings.uiPort) {
-                self.app = express();
-                // parse application/x-www-form-urlencoded
-                self.app.use(bodyParser.urlencoded({ extended: false }));
-                // parse application/json
-                self.app.use(bodyParser.json());
-                self.server = http.createServer(self.app).listen(config.port);
-            }
             webhook.publish(self);
             self.init = true;
         }
@@ -57,15 +43,8 @@ module.exports = (RED) => {
         self.on('close', function (removed, done) {
             if (self.cache)
                 self.cache.clear();
-            if (self.server) {
-                self.server.close();
-            }
-            else {
-                webhook.unpublish(self);
-            }
-            if (removed) {
-                self.init = false;
-            }
+            webhook.unpublish(self);
+            self.init = false;
             done();
         });
     }, {

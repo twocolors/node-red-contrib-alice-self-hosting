@@ -12,6 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const node_http_1 = __importDefault(require("node:http"));
+const body_parser_1 = __importDefault(require("body-parser"));
 const api_1 = require("./api");
 const morgan_body_1 = __importDefault(require("morgan-body"));
 module.exports = (RED) => {
@@ -195,6 +198,14 @@ module.exports = (RED) => {
             // middleware
             middleware: `${path}/v1.0/user/`
         };
+        if (self.config.port && self.config.port != RED.settings.uiPort) {
+            self.app = (0, express_1.default)();
+            // parse application/x-www-form-urlencoded
+            self.app.use(body_parser_1.default.urlencoded({ extended: false }));
+            // parse application/json
+            self.app.use(body_parser_1.default.json());
+            self.server = node_http_1.default.createServer(self.app).listen(self.config.port);
+        }
         const app = self.app || RED.httpNode;
         // debug
         if (self.config.debug)
@@ -214,12 +225,15 @@ module.exports = (RED) => {
         const credentials = self.credentials;
         const path = buildPath(credentials.path);
         const pathRegexp = new RegExp(`^${path}`, 'g');
-        for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
-            const route = RED.httpNode._router.stack[i];
+        const app = self.app || RED.httpNode;
+        for (let i = app._router.stack.length - 1; i >= 0; --i) {
+            const route = app._router.stack[i];
             if (route.route && route.route.path.match(pathRegexp)) {
-                RED.httpNode._router.stack.splice(i, 1);
+                app._router.stack.splice(i, 1);
             }
         }
+        if (self.server)
+            self.server.close();
     };
     return {
         publish,

@@ -150,9 +150,7 @@ module.exports = (RED: NodeAPI) => {
     self.updateInfoDevice = () => Api.callback_discovery(self.service);
 
     self.on('close', function (removed: any, done: () => any) {
-      if (removed) {
-        self.init = false;
-      }
+      self.init = false;
       done();
     });
   });

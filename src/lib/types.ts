@@ -1,14 +1,17 @@
 import {Node} from 'node-red';
 import NanoCache from 'nano-cache';
 import {Express} from 'express';
+import {Server} from 'node:http';
 
 export type NodeServiceType = Node & {
   cache: NanoCache;
   app: Express;
   config: {
     debug: boolean;
+    port: number;
   };
   init: boolean;
+  server: Server;
 };
 
 export type NodeDeviceType = Node & {

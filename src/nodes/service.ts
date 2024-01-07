@@ -1,11 +1,5 @@
 import {NodeAPI} from 'node-red';
 import NanoCache from 'nano-cache';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const http = require('http');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const express = require('express');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bodyParser = require('body-parser');
 
 module.exports = (RED: NodeAPI) => {
   const credentialsValidator = function (credentials: any) {
@@ -20,14 +14,14 @@ module.exports = (RED: NodeAPI) => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const webhook = require('../lib/webhook')(RED);
-
   // use cache (14 days and 4 MB)
   const cache: NanoCache = new NanoCache({
     ttl: 1000 * 60 * 60 * 24 * 14,
     maxEvictBytes: 4 * NanoCache.SIZE.MB
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const webhook = require('../lib/webhook')(RED);
 
   RED.nodes.registerType(
     'alice-sh-service',
@@ -43,18 +37,7 @@ module.exports = (RED: NodeAPI) => {
 
       try {
         credentialsValidator(self.credentials);
-
-        if (config.port && config.port != RED.settings.uiPort) {
-          self.app = express();
-          // parse application/x-www-form-urlencoded
-          self.app.use(bodyParser.urlencoded({extended: false}));
-          // parse application/json
-          self.app.use(bodyParser.json());
-          self.server = http.createServer(self.app).listen(config.port);
-        }
-
         webhook.publish(self);
-
         self.init = true;
       } catch (error: any) {
         self.error(error);
@@ -63,14 +46,8 @@ module.exports = (RED: NodeAPI) => {
 
       self.on('close', function (removed: any, done: () => any) {
         if (self.cache) self.cache.clear();
-        if (self.server) {
-          self.server.close();
-        } else {
-          webhook.unpublish(self);
-        }
-        if (removed) {
-          self.init = false;
-        }
+        webhook.unpublish(self);
+        self.init = false;
         done();
       });
     },

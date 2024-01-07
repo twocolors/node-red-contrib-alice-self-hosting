@@ -143,9 +143,7 @@ module.exports = (RED) => {
         // info device
         self.updateInfoDevice = () => api_1.Api.callback_discovery(self.service);
         self.on('close', function (removed, done) {
-            if (removed) {
-                self.init = false;
-            }
+            self.init = false;
             done();
         });
     });

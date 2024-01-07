@@ -1,9 +1,11 @@
 import {NodeAPI} from 'node-red';
-import express from 'express';
 import {NodeServiceType, NodeDeviceType} from './types';
+import express from 'express';
+import http from 'node:http';
+import bodyParser from 'body-parser';
 import {Api} from './api';
 import NanoCache from 'nano-cache';
-import MorganBody from 'morgan-body';
+import morganBody from 'morgan-body';
 
 module.exports = (RED: NodeAPI) => {
   // helper
@@ -195,10 +197,19 @@ module.exports = (RED: NodeAPI) => {
       middleware: `${path}/v1.0/user/`
     };
 
+    if (self.config.port && self.config.port != RED.settings.uiPort) {
+      self.app = express();
+      // parse application/x-www-form-urlencoded
+      self.app.use(bodyParser.urlencoded({extended: false}));
+      // parse application/json
+      self.app.use(bodyParser.json());
+      self.server = http.createServer(self.app).listen(self.config.port);
+    }
+
     const app: express.Express = self.app || RED.httpNode;
 
     // debug
-    if (self.config.debug) MorganBody(app, {maxBodyLength: 10000});
+    if (self.config.debug) morganBody(app, {maxBodyLength: 10000});
     // middleware
     app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
@@ -215,13 +226,16 @@ module.exports = (RED: NodeAPI) => {
     const credentials: any = self.credentials;
     const path: string = buildPath(credentials.path);
     const pathRegexp: RegExp = new RegExp(`^${path}`, 'g');
+    const app: express.Express = self.app || RED.httpNode;
 
-    for (let i = RED.httpNode._router.stack.length - 1; i >= 0; --i) {
-      const route = RED.httpNode._router.stack[i];
+    for (let i = app._router.stack.length - 1; i >= 0; --i) {
+      const route = app._router.stack[i];
       if (route.route && route.route.path.match(pathRegexp)) {
-        RED.httpNode._router.stack.splice(i, 1);
+        app._router.stack.splice(i, 1);
       }
     }
+
+    if (self.server) self.server.close();
   };
 
   return {
