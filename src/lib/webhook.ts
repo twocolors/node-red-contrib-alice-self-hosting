@@ -3,7 +3,7 @@ import {NodeServiceType, NodeDeviceType} from './types';
 import express from 'express';
 import http from 'node:http';
 import bodyParser from 'body-parser';
-import {Api} from './api';
+import {login} from './api';
 import NanoCache from 'nano-cache';
 import morganBody from 'morgan-body';
 
@@ -33,7 +33,7 @@ module.exports = (RED: NodeAPI) => {
       }
 
       try {
-        const response = await Api.login(token);
+        const response = await login(token);
         if (response?.data?.id) {
           cache.set(key, response.data);
         } else {

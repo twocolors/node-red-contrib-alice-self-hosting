@@ -139,9 +139,9 @@ module.exports = (RED) => {
             }
         };
         // state device
-        self.updateStateDevice = () => api_1.Api.callback_state(self.service, self.device);
+        self.updateStateDevice = () => (0, api_1.callback_state)(self.service, self.device);
         // info device
-        self.updateInfoDevice = () => api_1.Api.callback_discovery(self.service);
+        self.updateInfoDevice = () => (0, api_1.callback_discovery)(self.service);
         self.on('close', function (removed, done) {
             self.init = false;
             done();

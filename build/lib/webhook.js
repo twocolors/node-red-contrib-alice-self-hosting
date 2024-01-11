@@ -43,7 +43,7 @@ module.exports = (RED) => {
                 return next();
             }
             try {
-                const response = yield api_1.Api.login(token);
+                const response = yield (0, api_1.login)(token);
                 if ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.id) {
                     cache.set(key, response.data);
                 }

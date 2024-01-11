@@ -1,5 +1,5 @@
 import {NodeAPI} from 'node-red';
-import {Api} from '../lib/api';
+import {callback_state, callback_discovery} from '../lib/api';
 import {NodeServiceType} from '../lib/types';
 
 module.exports = (RED: NodeAPI) => {
@@ -144,10 +144,10 @@ module.exports = (RED: NodeAPI) => {
     };
 
     // state device
-    self.updateStateDevice = () => Api.callback_state(self.service, self.device);
+    self.updateStateDevice = () => callback_state(self.service, self.device);
 
     // info device
-    self.updateInfoDevice = () => Api.callback_discovery(self.service);
+    self.updateInfoDevice = () => callback_discovery(self.service);
 
     self.on('close', function (removed: any, done: () => any) {
       self.init = false;
