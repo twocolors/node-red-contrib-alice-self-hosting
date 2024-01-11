@@ -15,7 +15,7 @@ axios.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.
 const _error = function (error: AxiosError) {
   let text = `${error.response?.status} - ${error.message}`;
   if (error.response?.data && typeof error.response?.data === 'object') {
-    text = `${error.response?.status} - ${inspect(error.response?.data)}`;
+    text = `${text}\n${inspect(error.response?.data)}`;
   }
   return text;
 };
@@ -35,7 +35,7 @@ const _request = async function (options: any, retries: number, retryDelay: numb
 };
 
 // https://yandex.ru/dev/id/doc/ru/user-information
-export const login = async function (token: string | undefined) {
+export const login = function (token: string | undefined) {
   const _options = {
     method: 'GET',
     url: 'https://login.yandex.ru/info',
@@ -44,11 +44,11 @@ export const login = async function (token: string | undefined) {
     }
   };
 
-  return await _request(_options, 3, 150);
+  return _request(_options, 3, 150);
 };
 
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
-export const callback_state = async function (service: NodeServiceType, device: any) {
+export const callback_state = function (service: NodeServiceType, device: any) {
   const credentials: any = service.credentials;
   const ts: number = Date.now() / 1000;
 
@@ -68,11 +68,11 @@ export const callback_state = async function (service: NodeServiceType, device: 
     }
   };
 
-  return await _request(_options, 8, 200);
+  return _request(_options, 8, 200);
 };
 
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
-export const callback_discovery = async function (service: NodeServiceType) {
+export const callback_discovery = function (service: NodeServiceType) {
   const credentials: any = service.credentials;
   const ts: number = Date.now() / 1000;
 
@@ -91,5 +91,5 @@ export const callback_discovery = async function (service: NodeServiceType) {
     }
   };
 
-  return await _request(_options, 5, 150);
+  return _request(_options, 5, 150);
 };

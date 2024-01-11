@@ -209,7 +209,7 @@ module.exports = (RED: NodeAPI) => {
     const app: express.Express = self.app || RED.httpNode;
 
     // debug
-    if (self.config.debug) morganBody(app, {maxBodyLength: 10000});
+    if (self.config.debug) morganBody(app, {maxBodyLength: 10_000});
     // middleware
     app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware

@@ -47,10 +47,10 @@ const Package = require('../../package.json');
 // but make more 5xx for other ...
 axios_1.default.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 const _error = function (error) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d;
     let text = `${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - ${error.message}`;
     if (((_b = error.response) === null || _b === void 0 ? void 0 : _b.data) && typeof ((_c = error.response) === null || _c === void 0 ? void 0 : _c.data) === 'object') {
-        text = `${(_d = error.response) === null || _d === void 0 ? void 0 : _d.status} - ${(0, util_1.inspect)((_e = error.response) === null || _e === void 0 ? void 0 : _e.data)}`;
+        text = `${text}\n${(0, util_1.inspect)((_d = error.response) === null || _d === void 0 ? void 0 : _d.data)}`;
     }
     return text;
 };
@@ -71,63 +71,57 @@ const _request = function (options, retries, retryDelay) {
 };
 // https://yandex.ru/dev/id/doc/ru/user-information
 const login = function (token) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const _options = {
-            method: 'GET',
-            url: 'https://login.yandex.ru/info',
-            headers: {
-                Authorization: `OAuth ${token}`
-            }
-        };
-        return yield _request(_options, 3, 150);
-    });
+    const _options = {
+        method: 'GET',
+        url: 'https://login.yandex.ru/info',
+        headers: {
+            Authorization: `OAuth ${token}`
+        }
+    };
+    return _request(_options, 3, 150);
 };
 exports.login = login;
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
 const callback_state = function (service, device) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const credentials = service.credentials;
-        const ts = Date.now() / 1000;
-        const _options = {
-            method: 'POST',
-            url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
-            headers: {
-                Authorization: `OAuth ${credentials.oauth_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: {
-                ts: ts,
-                payload: {
-                    user_id: service.id,
-                    devices: [device]
-                }
+    const credentials = service.credentials;
+    const ts = Date.now() / 1000;
+    const _options = {
+        method: 'POST',
+        url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
+        headers: {
+            Authorization: `OAuth ${credentials.oauth_token}`,
+            'Content-Type': 'application/json'
+        },
+        data: {
+            ts: ts,
+            payload: {
+                user_id: service.id,
+                devices: [device]
             }
-        };
-        return yield _request(_options, 8, 200);
-    });
+        }
+    };
+    return _request(_options, 8, 200);
 };
 exports.callback_state = callback_state;
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
 const callback_discovery = function (service) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const credentials = service.credentials;
-        const ts = Date.now() / 1000;
-        const _options = {
-            method: 'POST',
-            url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
-            headers: {
-                Authorization: `OAuth ${credentials.oauth_token}`,
-                'Content-Type': 'application/json'
-            },
-            data: {
-                ts: ts,
-                payload: {
-                    user_id: service.id
-                }
+    const credentials = service.credentials;
+    const ts = Date.now() / 1000;
+    const _options = {
+        method: 'POST',
+        url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
+        headers: {
+            Authorization: `OAuth ${credentials.oauth_token}`,
+            'Content-Type': 'application/json'
+        },
+        data: {
+            ts: ts,
+            payload: {
+                user_id: service.id
             }
-        };
-        return yield _request(_options, 5, 150);
-    });
+        }
+    };
+    return _request(_options, 5, 150);
 };
 exports.callback_discovery = callback_discovery;
 //# sourceMappingURL=api.js.map
