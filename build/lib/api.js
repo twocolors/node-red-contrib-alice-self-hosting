@@ -60,12 +60,10 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 3,
             retryDelay: retryCount => retryCount * 150,
-            retryCondition: axios_retry_1.isRetryableError,
-            shouldResetTimeout: true
+            retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {
             method: 'GET',
-            timeout: 450,
             url: 'https://login.yandex.ru/info',
             headers: {
                 Authorization: `OAuth ${token}`,
@@ -86,12 +84,10 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 8,
             retryDelay: retryCount => retryCount * 200,
-            retryCondition: axios_retry_1.isRetryableError,
-            shouldResetTimeout: true
+            retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {
             method: 'POST',
-            timeout: 1600,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,
@@ -120,12 +116,10 @@ exports.Api = {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: 5,
             retryDelay: retryCount => retryCount * 150,
-            retryCondition: axios_retry_1.isRetryableError,
-            shouldResetTimeout: true
+            retryCondition: axios_retry_1.isRetryableError
         });
         const _options = {
             method: 'POST',
-            timeout: 750,
             url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
             headers: {
                 Authorization: `OAuth ${credentials.oauth_token}`,

@@ -26,13 +26,11 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 3,
       retryDelay: retryCount => retryCount * 150,
-      retryCondition: isRetryableError,
-      shouldResetTimeout: true
+      retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'GET',
-      timeout: 450,
       url: 'https://login.yandex.ru/info',
       headers: {
         Authorization: `OAuth ${token}`,
@@ -54,13 +52,11 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 8,
       retryDelay: retryCount => retryCount * 200,
-      retryCondition: isRetryableError,
-      shouldResetTimeout: true
+      retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'POST',
-      timeout: 1600,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/state`,
       headers: {
         Authorization: `OAuth ${credentials.oauth_token}`,
@@ -90,13 +86,11 @@ export const Api: {[key: string]: any} = {
     axiosRetry(axios, {
       retries: 5,
       retryDelay: retryCount => retryCount * 150,
-      retryCondition: isRetryableError,
-      shouldResetTimeout: true
+      retryCondition: isRetryableError
     });
 
     const _options = {
       method: 'POST',
-      timeout: 750,
       url: `https://dialogs.yandex.net/api/v1/skills/${credentials.skill_id}/callback/discovery`,
       headers: {
         Authorization: `OAuth ${credentials.oauth_token}`,
