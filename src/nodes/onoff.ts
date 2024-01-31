@@ -15,7 +15,8 @@ module.exports = (RED: NodeAPI) => {
     const ctype = 'devices.capabilities.on_off';
     const instance = 'on';
     const retrievable = config.retrievable;
-    const reportable = config.response; // reportable = response
+    const reportable = config.reportable;
+    const split = config.split;
 
     // helpers
     self.statusHelper = new Status(self);
@@ -33,15 +34,15 @@ module.exports = (RED: NodeAPI) => {
       device.setCapability(
         {
           type: ctype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           state: {
             instance: instance,
             value: value
           },
           parameters: {
             instance: instance,
-            split: !retrievable ? true : false
+            split: split
           }
         },
         ctype,

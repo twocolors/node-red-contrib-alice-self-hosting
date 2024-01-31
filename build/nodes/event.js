@@ -21,7 +21,7 @@ module.exports = (RED) => {
         const ptype = 'devices.properties.event';
         const instance = config.instance;
         const retrievable = true;
-        const reportable = true; // reportable = response
+        const reportable = true;
         const events = config.events;
         // helpers
         self.statusHelper = new status_1.Status(self);
@@ -40,8 +40,8 @@ module.exports = (RED) => {
             });
             device.setProperty({
                 type: ptype,
-                reportable: reportable,
                 retrievable: retrievable,
+                reportable: reportable,
                 parameters: {
                     instance: instance,
                     events: _events

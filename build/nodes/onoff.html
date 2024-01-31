@@ -9,7 +9,8 @@
       device: {value: '', type: 'alice-sh-device'},
       name: {value: ''},
       retrievable: {value: true},
-      response: {value: true}
+      reportable: {value: true},
+      split: {value: false}
     },
     inputs: 1,
     outputs: 1,
@@ -17,12 +18,27 @@
       return this.name + ':On_Off';
     },
     oneditprepare: function () {
-      if (this.response === undefined) {
-        $('#node-input-response').prop('checked', true);
-      }
       if (this.retrievable === undefined) {
         $('#node-input-retrievable').prop('checked', true);
       }
+      if (this.reportable === undefined) {
+        $('#node-input-reportable').prop('checked', true);
+      }
+      if (this.split === undefined) {
+        $('#node-input-split').prop('checked', false);
+      }
+      $('#node-input-retrievable').on('click', () => {
+        if ($('#node-input-retrievable').is(':checked')) {
+          $('#node-input-split').prop('checked', false);
+        }
+      });
+      $('#node-input-split').on('click', () => {
+        if ($('#node-input-split').is(':checked')) {
+          $('#node-input-retrievable').prop('checked', false);
+        } else {
+          $('#node-input-retrievable').prop('checked', true);
+        }
+      });
     },
     oneditsave: function () {
       deivcename = $('#node-input-device option:selected').text();
@@ -38,25 +54,36 @@
     <input id="node-input-device" />
   </div>
   <div class="form-row">
-    <label for="node-input-retrievable"><i class="fa fa-power-off"></i> <span>Main button</span></label>
+    <label for="node-input-retrievable"><i class="fa fa-refresh"></i> <span>Retrievable</span></label>
     <label for="node-input-retrievable" style="width:70%">
       <input
         type="checkbox"
         id="node-input-retrievable"
         style="display:inline-block; width:22px; vertical-align:baseline;"
         autocomplete="off"
-      /><span>Disable other controls if the device is turned off</span>
+      /><span>If it's possible to request the state of this device capability</span>
     </label>
   </div>
   <div class="form-row">
-    <label for="node-input-response"><i class="fa fa-refresh"></i> <span>Response</span></label>
-    <label for="node-input-response" style="width:70%">
+    <label for="node-input-reportable"><i class="fa fa-repeat"></i> <span>Reportable</span></label>
+    <label for="node-input-reportable" style="width:70%">
       <input
         type="checkbox"
-        id="node-input-response"
+        id="node-input-reportable"
         style="display:inline-block; width:22px; vertical-align:baseline;"
         autocomplete="off"
-      /><span>Always answer Alice with success</span>
+      /><span>Indicates that the notification service reports the capability state change</span>
+    </label>
+  </div>
+  <div class="form-row">
+    <label for="node-input-split"><i class="fa fa-power-off"></i> <span>Split</span></label>
+    <label for="node-input-split" style="width:70%">
+      <input
+        type="checkbox"
+        id="node-input-split"
+        style="display:inline-block; width:22px; vertical-align:baseline;"
+        autocomplete="off"
+      /><span>This parameter is used with <b>retrievable:false</b> and shows that<br>the provider uses different commands to turn on and off the device</span>
     </label>
   </div>
 </script>
@@ -72,21 +99,22 @@
     </dt>
     <dd>The device to which this feature is connected</dd>
     <dt>
-      Main button
+      Retrievable
       <span class="property-type">checkbox</span>
     </dt>
-    <dd>
-      The main button blocks access to other controls if the device is turned off. When unchecking this, the controls
-      will be available, but you will not be able to find out whether the device is on or off
-    </dd>
+    <dd>If it's possible to request the state of this device capability</dd>
     <dt>
-      Response
+      Reportable
+      <span class="property-type">checkbox</span>
+    </dt>
+    <dd>Indicates that the notification service reports the capability state change</dd>
+    <dt>
+      Split
       <span class="property-type">checkbox</span>
     </dt>
     <dd>
-      In order for the device to respond to Alice that the command was successful, the corresponding value should arrive
-      at the input within 2.5 seconds. If your device takes longer or doesn’t return a confirmation at all, just check
-      this box.
+      This parameter is used with <b>retrievable:false</b> and shows that the provider uses different commands to turn
+      on and off the device. On the Alice app home screen, the turn-on settings will be shown for all supported devices
     </dd>
   </dl>
 

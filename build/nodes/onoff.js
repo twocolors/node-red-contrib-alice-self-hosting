@@ -21,7 +21,8 @@ module.exports = (RED) => {
         const ctype = 'devices.capabilities.on_off';
         const instance = 'on';
         const retrievable = config.retrievable;
-        const reportable = config.response; // reportable = response
+        const reportable = config.reportable;
+        const split = config.split;
         // helpers
         self.statusHelper = new status_1.Status(self);
         // device not init
@@ -35,15 +36,15 @@ module.exports = (RED) => {
             self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
-                reportable: reportable,
                 retrievable: retrievable,
+                reportable: reportable,
                 state: {
                     instance: instance,
                     value: value
                 },
                 parameters: {
                     instance: instance,
-                    split: !retrievable ? true : false
+                    split: split
                 }
             }, ctype, instance);
         }

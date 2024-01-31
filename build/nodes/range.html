@@ -49,8 +49,9 @@
           }
         }
       },
-      response: {value: true},
-      retrievable: {value: true}
+      relative: {value: false},
+      retrievable: {value: true},
+      reportable: {value: true}
     },
     inputs: 1,
     outputs: 1,
@@ -181,11 +182,14 @@
         var val = $('#node-input-instance').find(':selected').val();
         instanceChange(val);
       });
+      if (this.relative === undefined) {
+        $('#node-input-relative').prop('checked', false);
+      }
       if (this.retrievable === undefined) {
         $('#node-input-retrievable').prop('checked', true);
       }
-      if (this.response === undefined) {
-        $('#node-input-response').prop('checked', true);
+      if (this.reportable === undefined) {
+        $('#node-input-reportable').prop('checked', true);
       }
     }
   });
@@ -229,25 +233,36 @@
     <input type="number" id="node-input-precision" />
   </div>
   <div class="form-row">
-    <label for="node-input-retrievable"><i class="fa fa-sign-out"></i> <span>Output</span></label>
+    <label for="node-input-relative"><i class="fa fa-line-chart"></i> <span>Relative</span></label>
+    <label for="node-input-relative" style="width:70%">
+      <input
+        type="checkbox"
+        id="node-input-relative"
+        style="display:inline-block; width:22px; vertical-align:baseline;"
+        autocomplete="off"
+      /><span>The method to calculate the function value for the skill</span>
+    </label>
+  </div>
+  <div class="form-row">
+    <label for="node-input-retrievable"><i class="fa fa-refresh"></i> <span>Retrievable</span></label>
     <label for="node-input-retrievable" style="width:70%">
       <input
         type="checkbox"
         id="node-input-retrievable"
         style="display:inline-block; width:22px; vertical-align:baseline;"
         autocomplete="off"
-      /><span>full value/changes only</span>
+      /><span>If it's possible to request the state of this device capability</span>
     </label>
   </div>
   <div class="form-row">
-    <label for="node-input-response"><i class="fa fa-refresh"></i> <span>Response</span></label>
-    <label for="node-input-response" style="width:70%">
+    <label for="node-input-reportable"><i class="fa fa-repeat"></i> <span>Reportable</span></label>
+    <label for="node-input-reportable" style="width:70%">
       <input
         type="checkbox"
-        id="node-input-response"
+        id="node-input-reportable"
         style="display:inline-block; width:22px; vertical-align:baseline;"
         autocomplete="off"
-      /><span>Always answer Alice with success</span>
+      /><span>Indicates that the notification service reports the capability state change</span>
     </label>
   </div>
 </script>
@@ -255,62 +270,82 @@
 <script type="text/html" data-help-name="alice-sh-range">
   <p>Manage device settings that have a range. For example, lamp brightness, sound volume, heater temperature, etc.</p>
 
-    <h3>Property</h3>
-    <dl class="message-properties">
-        <dt>Device
-            <span class="property-type">Select</span>
-        </dt>
-        <dd> The device to which this feature is connected </dd>
-        <dt>Range Type
-            <span class="property-type">Select</span>
-        </dt>
-        <dd> Selection of the type of ranges (brightness, sound, channel, temperature, etc.) </dd>
-        <dt>Unit
-            <span class="property-type">Select</span>
-        </dt>
-        <dd> Unit of measure for the range </dd>
-        <dt>Min
-            <span class="property-type">Float</span>
-        </dt>
-        <dd> Minimum value </dd>
-        <dt>Max
-            <span class="property-type">Float</span>
-        </dt>
-        <dd> Maximum value </dd>
-        <dt>precision
-            <span class="property-type">Float</span>
-        </dt>
-        <dd> The minimum step of changing values within the range </dd>
-        <dt>Output
-            <span class="property-type">checkbox</span>
-        </dt>
-        <dd> Determines what kind of value will be output. The full value that the device should set or the delta of the value change.
-            When the checkbox is unchecked, the current device values are not stored in Yandex.. </dd>
-        <dt>Response
-            <span class="property-type">checkbox</span>
-        </dt>
-        <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
-            If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
-    </dl>
-    </dl>
+  <h3>Property</h3>
+  <dl class="message-properties">
+    <dt>
+      Device
+      <span class="property-type">Select</span>
+    </dt>
+    <dd>The device to which this feature is connected</dd>
+    <dt>
+      Range Type
+      <span class="property-type">Select</span>
+    </dt>
+    <dd>Selection of the type of ranges (brightness, sound, channel, temperature, etc.)</dd>
+    <dt>
+      Unit
+      <span class="property-type">Select</span>
+    </dt>
+    <dd>Unit of measure for the range</dd>
+    <dt>
+      Min
+      <span class="property-type">Float</span>
+    </dt>
+    <dd>Minimum value</dd>
+    <dt>
+      Max
+      <span class="property-type">Float</span>
+    </dt>
+    <dd>Maximum value</dd>
+    <dt>
+      precision
+      <span class="property-type">Float</span>
+    </dt>
+    <dd>The minimum step of changing values within the range</dd>
+    <dt>
+      Relative
+      <span class="property-type">checkbox</span>
+    </dt>
+    <dd>The method to calculate the function value for the skill<br>
+      <ul>
+        <li><b>true:</b> The new function value is calculated from the current value by incrementing it by <b>value</b></li>
+        <li><b>false:</b> The skill function is set to <b>value</b></li>
+    </dd>
+    <dt>
+      Retrievable
+      <span class="property-type">checkbox</span>
+    </dt>
+    <dd>If it's possible to request the state of this device capability</dd>
+    <dt>
+      Reportable
+      <span class="property-type">checkbox</span>
+    </dt>
+    <dd>Indicates that the notification service reports the capability state change</dd>
+  </dl>
 
-    <h3>Inputs</h3>
-        <dl class="message-properties">
-            <dt>payload
-                <span class="property-type">Float</span>
-            </dt>
-            <dd> Value </dd>
-        </dl>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      payload
+      <span class="property-type">Float</span>
+    </dt>
+    <dd>Value</dd>
+  </dl>
 
-     <h3>Outputs</h3>
-        <dl class="message-properties">
-            <dt>payload
-                <span class="property-type">Float</span>
-            </dt>
-            <dd> Value </dd>
-        </dl>
-    <h3>References</h3>
-        <ul>
-            <li><a target="_blank" href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/range-docpage/">Yandex documentation</a></li>
-        </ul>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>
+      payload
+      <span class="property-type">Float</span>
+    </dt>
+    <dd>Value</dd>
+  </dl>
+  <h3>References</h3>
+  <ul>
+    <li>
+      <a target="_blank" href="https://yandex.ru/dev/dialogs/alice/doc/smart-home/concepts/range-docpage/"
+        >Yandex documentation</a
+      >
+    </li>
+  </ul>
 </script>

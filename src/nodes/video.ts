@@ -17,7 +17,7 @@ module.exports = (RED: NodeAPI) => {
     const stream_url = config.stream_url;
     const protocol = config.protocol;
     const retrievable = false;
-    const reportable = false; // reportable = response
+    const reportable = false;
 
     // helpers
     self.statusHelper = new Status(self);
@@ -32,8 +32,8 @@ module.exports = (RED: NodeAPI) => {
       device.setCapability(
         {
           type: ctype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           state: {
             instance: instance,
             value: {

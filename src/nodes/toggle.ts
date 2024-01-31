@@ -14,8 +14,8 @@ module.exports = (RED: NodeAPI) => {
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.toggle';
     const instance = config.instance;
-    const retrievable = true;
-    const reportable = config.response; // reportable = response
+    const retrievable = config.retrievable;
+    const reportable = config.reportable;
 
     // helpers
     self.statusHelper = new Status(self);
@@ -33,8 +33,8 @@ module.exports = (RED: NodeAPI) => {
       device.setCapability(
         {
           type: ctype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           state: {
             instance: instance,
             value: value

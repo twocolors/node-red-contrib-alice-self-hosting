@@ -20,8 +20,9 @@ module.exports = (RED) => {
         const device = RED.nodes.getNode(config.device);
         const ctype = 'devices.capabilities.range';
         const instance = config.instance;
+        const relative = config.relative;
         const retrievable = config.retrievable;
-        const reportable = config.response; // reportable = response
+        const reportable = config.reportable;
         const unit = config.unit;
         const min = parseFloat(config.min) || 0;
         const max = parseFloat(config.max) || 100;
@@ -39,9 +40,10 @@ module.exports = (RED) => {
             self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
-                reportable: reportable,
                 retrievable: retrievable,
+                reportable: reportable,
                 state: {
+                    relative: relative,
                     instance: instance,
                     value: value
                 },
@@ -112,7 +114,7 @@ module.exports = (RED) => {
             var _a, _b, _c, _d, _e, _f, _g;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
                 let _value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
-                if (retrievable && ((_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.relative)) {
+                if (relative && ((_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.relative)) {
                     _value = value + ((_d = object === null || object === void 0 ? void 0 : object.state) === null || _d === void 0 ? void 0 : _d.value);
                     if (((_e = object === null || object === void 0 ? void 0 : object.state) === null || _e === void 0 ? void 0 : _e.value) < 0 && _value < min)
                         _value = min;

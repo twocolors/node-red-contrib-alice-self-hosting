@@ -15,7 +15,7 @@ module.exports = (RED: NodeAPI) => {
     const ptype = 'devices.properties.event';
     const instance = config.instance;
     const retrievable = true;
-    const reportable = true; // reportable = response
+    const reportable = true;
     const events = config.events;
 
     // helpers
@@ -39,8 +39,8 @@ module.exports = (RED: NodeAPI) => {
       device.setProperty(
         {
           type: ptype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           parameters: {
             instance: instance,
             events: _events

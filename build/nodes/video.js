@@ -23,7 +23,7 @@ module.exports = (RED) => {
         const stream_url = config.stream_url;
         const protocol = config.protocol;
         const retrievable = false;
-        const reportable = false; // reportable = response
+        const reportable = false;
         // helpers
         self.statusHelper = new status_1.Status(self);
         // device not init
@@ -34,8 +34,8 @@ module.exports = (RED) => {
             self.statusHelper.clear();
             device.setCapability({
                 type: ctype,
-                reportable: reportable,
                 retrievable: retrievable,
+                reportable: reportable,
                 state: {
                     instance: instance,
                     value: {

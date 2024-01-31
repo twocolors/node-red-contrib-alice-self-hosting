@@ -13,8 +13,8 @@ module.exports = (RED: NodeAPI) => {
     // var
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.color_setting';
-    const retrievable = true;
-    const reportable = config.response; // reportable = response
+    const retrievable = config.retrievable;
+    const reportable = config.reportable;
     const color_support = config.color_support;
     const scheme = config.scheme;
     const temperature_k = config.temperature_k;
@@ -77,8 +77,8 @@ module.exports = (RED: NodeAPI) => {
       device.setCapability(
         {
           type: ctype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           state: {
             instance: instance,
             value: value

@@ -22,7 +22,7 @@ module.exports = (RED) => {
         const instance = config.instance;
         const unit = config.unit;
         const retrievable = true;
-        const reportable = true; // reportable = response
+        const reportable = true;
         // helpers
         self.statusHelper = new status_1.Status(self);
         // device not init
@@ -36,8 +36,8 @@ module.exports = (RED) => {
             self.statusHelper.clear();
             device.setProperty({
                 type: ptype,
-                reportable: reportable,
                 retrievable: retrievable,
+                reportable: reportable,
                 parameters: {
                     instance: instance,
                     unit: unit

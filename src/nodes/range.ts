@@ -14,8 +14,9 @@ module.exports = (RED: NodeAPI) => {
     const device = RED.nodes.getNode(config.device) as NodeDeviceType;
     const ctype = 'devices.capabilities.range';
     const instance = config.instance;
+    const relative = config.relative;
     const retrievable = config.retrievable;
-    const reportable = config.response; // reportable = response
+    const reportable = config.reportable;
     const unit = config.unit;
     const min = parseFloat(config.min) || 0;
     const max = parseFloat(config.max) || 100;
@@ -37,9 +38,10 @@ module.exports = (RED: NodeAPI) => {
       device.setCapability(
         {
           type: ctype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           state: {
+            relative: relative,
             instance: instance,
             value: value
           },
@@ -136,7 +138,7 @@ module.exports = (RED: NodeAPI) => {
       if (object?.type == ctype && object?.state?.instance == instance) {
         let _value = object?.state?.value;
 
-        if (retrievable && object?.state?.relative) {
+        if (relative && object?.state?.relative) {
           _value = value + object?.state?.value;
           if (object?.state?.value < 0 && _value < min) _value = min;
           if (object?.state?.value > 0 && _value > max) _value = max;

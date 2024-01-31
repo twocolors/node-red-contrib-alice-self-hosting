@@ -24,7 +24,8 @@
           return ms.length > 0;
         }
       },
-      response: {value: true}
+      retrievable: {value: true},
+      reportable: {value: true}
     },
     inputs: 1,
     outputs: 1,
@@ -41,6 +42,13 @@
       this.modes = getCurrentModes();
     },
     oneditprepare: function () {
+      if (this.retrievable === undefined) {
+        $('#node-input-retrievable').prop('checked', true);
+      }
+      if (this.reportable === undefined) {
+        $('#node-input-reportable').prop('checked', true);
+      }
+
       var firstRun = true;
       $('#node-input-instance').on('change', () => {
         var val = $('#node-input-instance').find(':selected').val();
@@ -321,14 +329,25 @@
     </div>
   </div>
   <div class="form-row">
-    <label for="node-input-response"><i class="fa fa-refresh"></i> <span>Response</span></label>
-    <label for="node-input-response" style="width:70%">
+    <label for="node-input-retrievable"><i class="fa fa-refresh"></i> <span>Retrievable</span></label>
+    <label for="node-input-retrievable" style="width:70%">
       <input
         type="checkbox"
-        id="node-input-response"
+        id="node-input-retrievable"
         style="display:inline-block; width:22px; vertical-align:baseline;"
         autocomplete="off"
-      /><span>Always answer Alice with success</span>
+      /><span>If it's possible to request the state of this device capability</span>
+    </label>
+  </div>
+  <div class="form-row">
+    <label for="node-input-reportable"><i class="fa fa-repeat"></i> <span>Reportable</span></label>
+    <label for="node-input-reportable" style="width:70%">
+      <input
+        type="checkbox"
+        id="node-input-reportable"
+        style="display:inline-block; width:22px; vertical-align:baseline;"
+        autocomplete="off"
+      /><span>Indicates that the notification service reports the capability state change</span>
     </label>
   </div>
 </script>
@@ -350,11 +369,16 @@
           <span class="property-type">List</span>
       </dt>
       <dd> List of commands that are supported by this mode. You can add other commands yourself. </dd>
-      <dt>Response
-          <span class="property-type">checkbox</span>
+      <dt>
+        Retrievable
+        <span class="property-type">checkbox</span>
       </dt>
-      <dd> In order for the device to respond to Alice that the command was successful, the corresponding value should arrive at the input within 2.5 seconds.
-          If your device takes longer or doesn’t return a confirmation at all, just check this box. </dd>
+      <dd>If it's possible to request the state of this device capability</dd>
+      <dt>
+        Reportable
+        <span class="property-type">checkbox</span>
+      </dt>
+      <dd>Indicates that the notification service reports the capability state change</dd>
   </dl>
   </dl>
 

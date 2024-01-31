@@ -16,7 +16,7 @@ module.exports = (RED: NodeAPI) => {
     const instance = config.instance;
     const unit = config.unit;
     const retrievable = true;
-    const reportable = true; // reportable = response
+    const reportable = true;
 
     // helpers
     self.statusHelper = new Status(self);
@@ -34,8 +34,8 @@ module.exports = (RED: NodeAPI) => {
       device.setProperty(
         {
           type: ptype,
-          reportable: reportable,
           retrievable: retrievable,
+          reportable: reportable,
           parameters: {
             instance: instance,
             unit: unit
