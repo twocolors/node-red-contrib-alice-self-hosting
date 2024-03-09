@@ -13,7 +13,7 @@
 ![Repo size](https://img.shields.io/github/repo-size/twocolors/node-red-contrib-alice-self-hosting)
 
 ## 💡💬
-Обсудить и общаться в душной обстановке можно [https://t.me/alice_in_red_wonderland](https://t.me/alice_in_red_wonderland)
+Обсудить и общаться в душной обстановке можно тут [https://t.me/alice_in_red_wonderland](https://t.me/alice_in_red_wonderland)
 
 ## Предупреждение
 
