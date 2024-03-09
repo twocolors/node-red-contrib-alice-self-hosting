@@ -12,6 +12,9 @@
 ![NPM Downloads per month](https://img.shields.io/npm/dm/node-red-contrib-alice-self-hosting)
 ![Repo size](https://img.shields.io/github/repo-size/twocolors/node-red-contrib-alice-self-hosting)
 
+## 💡💬
+Обсудить и общаться в душной обстановке можно [https://t.me/alice_in_red_wonderland](https://t.me/alice_in_red_wonderland)
+
 ## Предупреждение
 
 **!!! ВНИМАНИЕ !!!**
@@ -185,7 +188,7 @@ labels:
 <img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/npm-new-proxy.png" width=40% align=top> <img src="https://github.com/twocolors/node-red-contrib-alice-self-hosting/raw/master/readme/npm-ssl.png" width=40% align=top>
 
 Внимание! Эти настройки **не ограничивают доступ к Node-RED**! Любой пользователь может получить полный доступ к панели управления по адресу `https://alice.mydomain.ru`.
-    
+
 </details>
 
 
