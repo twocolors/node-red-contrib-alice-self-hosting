@@ -8,7 +8,7 @@
         value: '1880',
         validate: function (v) {
           let value = parseInt(v);
-          return value >= 1024 && value <= 60000;
+          return (value >= 1025 && value <= 65535) || value == 80 || value == 443;
         }
       },
       debug: {value: false}
@@ -85,7 +85,12 @@
 
   <div class="form-row">
     <label for="node-config-input-debug"><i class="fa fa-file-o"></i> Debug</label>
-    <input type="checkbox" id="node-config-input-debug" style="display:inline-block; width:22px; vertical-align:top;" autocomplete="off">
+    <input
+      type="checkbox"
+      id="node-config-input-debug"
+      style="display:inline-block; width:22px; vertical-align:top;"
+      autocomplete="off"
+    />
   </div>
 
   <div class="form-row">
@@ -122,7 +127,7 @@
       >
     </dd>
     <dt class="required">Port<span class="property-type">number</span></dt>
-    <dd>Webhook port url for Yandex Dialogs, port range from 1024 to 60000</dd>
+    <dd>Webhook port url for Yandex Dialogs, port range from 1025 to 65535 and default 80,443</dd>
     <dt class="required">Path<span class="property-type">string</span></dt>
     <dd>Webhook path url for Yandex Dialogs</dd>
   </dl>
