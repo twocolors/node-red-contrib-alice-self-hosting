@@ -20,10 +20,10 @@ const _error = function (error: AxiosError) {
   return text;
 };
 
-const _request = async function (options: any, retries: number, retryDelay: number) {
+const _request = async function (options: any, retries: number = 5) {
   axiosRetry(axios, {
     retries: retries,
-    retryDelay: retryCount => retryCount * retryDelay,
+    retryDelay: axiosRetry.exponentialDelay,
     retryCondition: isRetryableError
   });
 
@@ -44,7 +44,7 @@ export const login = function (token: string | undefined) {
     }
   };
 
-  return _request(_options, 3, 150);
+  return _request(_options, 3);
 };
 
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
@@ -68,7 +68,7 @@ export const callback_state = function (service: NodeServiceType, device: any) {
     }
   };
 
-  return _request(_options, 8, 200);
+  return _request(_options);
 };
 
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -91,5 +91,5 @@ export const callback_discovery = function (service: NodeServiceType) {
     }
   };
 
-  return _request(_options, 5, 150);
+  return _request(_options);
 };

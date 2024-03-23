@@ -54,11 +54,11 @@ const _error = function (error) {
     }
     return text;
 };
-const _request = function (options, retries, retryDelay) {
+const _request = function (options, retries = 5) {
     return __awaiter(this, void 0, void 0, function* () {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: retries,
-            retryDelay: retryCount => retryCount * retryDelay,
+            retryDelay: axios_retry_1.default.exponentialDelay,
             retryCondition: axios_retry_1.isRetryableError
         });
         try {
@@ -78,7 +78,7 @@ const login = function (token) {
             Authorization: `OAuth ${token}`
         }
     };
-    return _request(_options, 3, 150);
+    return _request(_options, 3);
 };
 exports.login = login;
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
@@ -100,7 +100,7 @@ const callback_state = function (service, device) {
             }
         }
     };
-    return _request(_options, 8, 200);
+    return _request(_options);
 };
 exports.callback_state = callback_state;
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-discovery.html
@@ -121,7 +121,7 @@ const callback_discovery = function (service) {
             }
         }
     };
-    return _request(_options, 5, 150);
+    return _request(_options);
 };
 exports.callback_discovery = callback_discovery;
 //# sourceMappingURL=api.js.map
