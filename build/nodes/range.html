@@ -94,8 +94,8 @@
             max = typeof max !== 'undefined' ? max : 1000;
             precision = typeof precision !== 'undefined' ? precision : 1;
             $('#node-input-unit').replaceWith('<select id="node-input-unit" style="width: 70%;"></select>');
-            $('#node-input-unit').append('<option value="unit.number">Number</option>');
-            $('#node-input-unit select').val('unit.number');
+            $('#node-input-unit').append('<option value=""></option>');
+            $('#node-input-unit select').val('');
             $('#node-input-unit').prop('disabled', true);
             $('#node-input-min').val(min);
             $('#node-input-min').prop('disabled', false);
