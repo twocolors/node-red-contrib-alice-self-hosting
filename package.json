@@ -13,11 +13,11 @@
   },
   "author": "D",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc --build",
     "build:clean": "npm run clean && npm run build",
     "clean": "rm -rf build/**/*.js build/**/*.js.map build/**/*.d.ts",
-    "eslint": "eslint \"src/**/*.ts\"",
-    "prettier": "prettier --write \"**/*.{js,ts}\""
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "npm run lint -- --fix"
   },
   "node-red": {
     "version": ">=2.2.0",
