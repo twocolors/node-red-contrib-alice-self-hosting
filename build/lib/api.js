@@ -54,8 +54,8 @@ const _error = function (error) {
     }
     return text;
 };
-const _request = function (options, retries = 5) {
-    return __awaiter(this, void 0, void 0, function* () {
+const _request = function (options_1) {
+    return __awaiter(this, arguments, void 0, function* (options, retries = 5) {
         (0, axios_retry_1.default)(axios_1.default, {
             retries: retries,
             retryDelay: axios_retry_1.default.exponentialDelay,

@@ -111,7 +111,7 @@ module.exports = (RED) => {
             }
         }));
         const onState = (object) => {
-            var _a, _b, _c, _d, _e, _f, _g;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
                 let _value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
                 if (relative && ((_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.relative)) {
@@ -126,8 +126,10 @@ module.exports = (RED) => {
                 device.cache.set(keyCache, value);
                 self.send({
                     payload: value,
-                    type: object === null || object === void 0 ? void 0 : object.type,
-                    instance: (_g = object === null || object === void 0 ? void 0 : object.state) === null || _g === void 0 ? void 0 : _g.instance
+                    name: (_g = device.device) === null || _g === void 0 ? void 0 : _g.name,
+                    room: (_h = device.device) === null || _h === void 0 ? void 0 : _h.room,
+                    type: (_j = device.device) === null || _j === void 0 ? void 0 : _j.type,
+                    capability: { type: object === null || object === void 0 ? void 0 : object.type, instance: (_k = object === null || object === void 0 ? void 0 : object.state) === null || _k === void 0 ? void 0 : _k.instance }
                 });
                 self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: value }, 3000);
                 if (reportable) {

@@ -131,8 +131,10 @@ module.exports = (RED: NodeAPI) => {
 
         self.send({
           payload: value,
-          type: object?.type,
-          instance: object?.state?.instance
+          name: device.device?.name,
+          room: device.device?.room,
+          type: device.device?.type,
+          capability: {type: object?.type, instance: object?.state?.instance}
         });
 
         self.statusHelper.set({fill: 'yellow', shape: 'dot', text: value}, 3000);

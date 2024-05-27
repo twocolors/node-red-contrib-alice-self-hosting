@@ -138,15 +138,17 @@ module.exports = (RED) => {
             }
         }));
         const onState = (object) => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d, _e, _f;
             if ((object === null || object === void 0 ? void 0 : object.type) == ctype && ((_a = object === null || object === void 0 ? void 0 : object.state) === null || _a === void 0 ? void 0 : _a.instance) == instance) {
                 value = (_b = object === null || object === void 0 ? void 0 : object.state) === null || _b === void 0 ? void 0 : _b.value;
                 device.updateState(value, ctype, instance);
                 device.cache.set(keyCache, value);
                 self.send({
                     payload: value,
-                    type: object === null || object === void 0 ? void 0 : object.type,
-                    instance: (_c = object === null || object === void 0 ? void 0 : object.state) === null || _c === void 0 ? void 0 : _c.instance
+                    name: (_c = device.device) === null || _c === void 0 ? void 0 : _c.name,
+                    room: (_d = device.device) === null || _d === void 0 ? void 0 : _d.room,
+                    type: (_e = device.device) === null || _e === void 0 ? void 0 : _e.type,
+                    capability: { type: object === null || object === void 0 ? void 0 : object.type, instance: (_f = object === null || object === void 0 ? void 0 : object.state) === null || _f === void 0 ? void 0 : _f.instance }
                 });
                 self.statusHelper.set({ fill: 'yellow', shape: 'dot', text: value }, 3000);
                 if (reportable) {
