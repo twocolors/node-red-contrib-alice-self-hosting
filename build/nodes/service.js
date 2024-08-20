@@ -16,10 +16,10 @@ module.exports = (RED) => {
             throw new Error('Parameter `Path` is required');
         }
     };
-    // use cache (14 days and 4 MB)
+    // use cache (14 days or 4 MB)
     const cache = new nano_cache_1.default({
         ttl: 1000 * 60 * 60 * 24 * 14,
-        maxEvictBytes: 4 * nano_cache_1.default.SIZE.MB
+        bytes: 4 * nano_cache_1.default.SIZE.MB
     });
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const webhook = require('../lib/webhook')(RED);
