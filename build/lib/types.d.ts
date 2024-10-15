@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Node } from 'node-red';
 import NanoCache from 'nano-cache';
 import { Express } from 'express';

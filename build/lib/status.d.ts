@@ -1,4 +1,3 @@
-/// <reference types="node-red__registry" />
 import { NodeStatus } from '@node-red/registry';
 import { Node } from 'node-red';
 export declare class Status {
