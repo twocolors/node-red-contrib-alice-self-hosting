@@ -199,27 +199,30 @@ module.exports = (RED: NodeAPI) => {
 
     if (self.config.port && self.config.port != RED.settings.uiPort) {
       self.app = express();
-      // parse application/x-www-form-urlencoded
-      self.app.use(bodyParser.urlencoded({extended: false}));
-      // parse application/json
-      self.app.use(bodyParser.json());
       self.server = http.createServer(self.app).listen(self.config.port);
     }
 
     const app: express.Express = self.app || RED.httpNode;
 
+    // middleware parser
+    const apiMaxLength = RED.settings.apiMaxLength || '5mb';
+    // parse application/x-www-form-urlencoded
+    const urlencodedParser = bodyParser.urlencoded({limit: apiMaxLength, extended: true});
+    // parse application/json
+    const jsonParser = bodyParser.json({limit: apiMaxLength});
+
     // debug
     if (self.config.debug) morganBody(app, {maxBodyLength: 10_000_000});
     // middleware
-    app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
-    app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
+    app.use(route.middleware, urlencodedParser, jsonParser, validatorMiddleware(self)); // validatorMiddleware
+    app.use(route.middleware, urlencodedParser, jsonParser, authenticationMiddleware(self)); // authenticationMiddleware
     // route
-    app.get(route.base, pong);
-    app.head(route.pong, pong);
-    app.post(route.unlink, unlink(self));
-    app.get(route.devices, devices(self));
-    app.post(route.query, query(self));
-    app.post(route.action, action(self));
+    app.get(route.base, urlencodedParser, jsonParser, pong);
+    app.head(route.pong, urlencodedParser, jsonParser, pong);
+    app.post(route.unlink, urlencodedParser, jsonParser, unlink(self));
+    app.get(route.devices, urlencodedParser, jsonParser, devices(self));
+    app.post(route.query, urlencodedParser, jsonParser, query(self));
+    app.post(route.action, urlencodedParser, jsonParser, action(self));
   };
 
   const unpublish = function (self: NodeServiceType) {

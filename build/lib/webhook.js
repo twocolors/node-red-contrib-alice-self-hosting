@@ -200,26 +200,28 @@ module.exports = (RED) => {
         };
         if (self.config.port && self.config.port != RED.settings.uiPort) {
             self.app = (0, express_1.default)();
-            // parse application/x-www-form-urlencoded
-            self.app.use(body_parser_1.default.urlencoded({ extended: false }));
-            // parse application/json
-            self.app.use(body_parser_1.default.json());
             self.server = node_http_1.default.createServer(self.app).listen(self.config.port);
         }
         const app = self.app || RED.httpNode;
+        // middleware parser
+        const apiMaxLength = RED.settings.apiMaxLength || '5mb';
+        // parse application/x-www-form-urlencoded
+        const urlencodedParser = body_parser_1.default.urlencoded({ limit: apiMaxLength, extended: true });
+        // parse application/json
+        const jsonParser = body_parser_1.default.json({ limit: apiMaxLength });
         // debug
         if (self.config.debug)
             (0, morgan_body_1.default)(app, { maxBodyLength: 10000000 });
         // middleware
-        app.use(route.middleware, validatorMiddleware(self)); // validatorMiddleware
-        app.use(route.middleware, authenticationMiddleware(self)); // authenticationMiddleware
+        app.use(route.middleware, urlencodedParser, jsonParser, validatorMiddleware(self)); // validatorMiddleware
+        app.use(route.middleware, urlencodedParser, jsonParser, authenticationMiddleware(self)); // authenticationMiddleware
         // route
-        app.get(route.base, pong);
-        app.head(route.pong, pong);
-        app.post(route.unlink, unlink(self));
-        app.get(route.devices, devices(self));
-        app.post(route.query, query(self));
-        app.post(route.action, action(self));
+        app.get(route.base, urlencodedParser, jsonParser, pong);
+        app.head(route.pong, urlencodedParser, jsonParser, pong);
+        app.post(route.unlink, urlencodedParser, jsonParser, unlink(self));
+        app.get(route.devices, urlencodedParser, jsonParser, devices(self));
+        app.post(route.query, urlencodedParser, jsonParser, query(self));
+        app.post(route.action, urlencodedParser, jsonParser, action(self));
     };
     const unpublish = function (self) {
         const credentials = self.credentials;

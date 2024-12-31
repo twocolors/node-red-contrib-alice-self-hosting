@@ -15,7 +15,7 @@
   "scripts": {
     "build": "npx tsc --build",
     "build:clean": "npm run clean && npm run build",
-    "clean": "rm -rf build/**/*.js build/**/*.js.map build/**/*.d.ts",
+    "clean": "rm -rf tsconfig.tsbuildinfo build/**/*.js build/**/*.js.map build/**/*.d.ts",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "npm run lint -- --fix"
   },
