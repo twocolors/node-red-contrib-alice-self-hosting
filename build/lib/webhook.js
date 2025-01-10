@@ -200,6 +200,7 @@ module.exports = (RED) => {
         };
         if (self.config.port && self.config.port != RED.settings.uiPort) {
             self.app = (0, express_1.default)();
+            self.app.disable('x-powered-by');
             self.server = node_http_1.default.createServer(self.app).listen(self.config.port);
         }
         const app = self.app || RED.httpNode;

@@ -199,6 +199,7 @@ module.exports = (RED: NodeAPI) => {
 
     if (self.config.port && self.config.port != RED.settings.uiPort) {
       self.app = express();
+      self.app.disable('x-powered-by');
       self.server = http.createServer(self.app).listen(self.config.port);
     }
 
