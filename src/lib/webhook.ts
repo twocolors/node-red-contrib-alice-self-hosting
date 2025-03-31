@@ -18,8 +18,12 @@ module.exports = (RED: NodeAPI) => {
   const validatorMiddleware = (node: NodeServiceType) => {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-      if (request_id && token) return next();
-      return res.status(400).json({error: 'not validate request_id or token'});
+      if (request_id && token) {
+        next();
+      } else {
+        res.status(400).json({error: 'not validate request_id or token'});
+      }
+      return;
     };
   };
   const authenticationMiddleware = (node: NodeServiceType) => {
@@ -29,7 +33,8 @@ module.exports = (RED: NodeAPI) => {
       const key: string = `${token}-${node.id}`;
 
       if (cache.get(key)) {
-        return next();
+        next();
+        return;
       }
 
       try {
@@ -37,18 +42,24 @@ module.exports = (RED: NodeAPI) => {
         if (response?.data?.id) {
           cache.set(key, response.data);
         } else {
-          return res.status(401).json({error: response?.data});
+          res.status(401).json({error: response?.data});
+          return;
         }
       } catch (error: any) {
-        return res.status(401).json({error: error.message});
+        res.status(401).json({error: error.message});
+        return;
       }
 
-      return next();
+      next();
+      return;
     };
   };
 
   // route
-  const pong = (req: express.Request, res: express.Response) => res.sendStatus(200);
+  const pong = (req: express.Request, res: express.Response) => {
+    res.sendStatus(200);
+    return;
+  };
   const unlink = (node: NodeServiceType) => {
     return (req: express.Request, res: express.Response) => {
       const cache: NanoCache = node.cache;
@@ -57,7 +68,8 @@ module.exports = (RED: NodeAPI) => {
 
       if (cache.get(key)) cache.del(key);
 
-      return res.sendStatus(200);
+      res.sendStatus(200);
+      return;
     };
   };
   const devices = (node: NodeServiceType) => {
@@ -79,7 +91,8 @@ module.exports = (RED: NodeAPI) => {
         }
       });
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
   const query = (node: NodeServiceType) => {
@@ -87,7 +100,10 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.devices;
 
-      if (!devices) return res.status(400).json({error: 'devices is empty'});
+      if (!devices) {
+        res.status(400).json({error: 'devices is empty'});
+        return;
+      }
 
       const json: any = {
         request_id: request_id,
@@ -110,7 +126,8 @@ module.exports = (RED: NodeAPI) => {
         }
       });
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
   const action = (node: NodeServiceType) => {
@@ -118,7 +135,10 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.payload?.devices;
 
-      if (!devices) return res.status(400).json({error: 'devices is empty'});
+      if (!devices) {
+        res.status(400).json({error: 'devices is empty'});
+        return;
+      }
 
       const json: any = {
         request_id: request_id,
@@ -177,7 +197,8 @@ module.exports = (RED: NodeAPI) => {
         }
       });
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
 
