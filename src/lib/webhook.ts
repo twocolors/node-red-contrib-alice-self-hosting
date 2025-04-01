@@ -4,7 +4,7 @@ import express from 'express';
 import http from 'node:http';
 import bodyParser from 'body-parser';
 import {login} from './api';
-import NanoCache from 'nano-cache';
+import {LRUCache} from 'lru-cache';
 import morganBody from 'morgan-body';
 
 module.exports = (RED: NodeAPI) => {
@@ -28,11 +28,11 @@ module.exports = (RED: NodeAPI) => {
   };
   const authenticationMiddleware = (node: NodeServiceType) => {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const cache: NanoCache = node.cache;
+      const cache: LRUCache<string, any> = node.cache;
       const token: string | undefined = req.get('Authorization')?.split(' ')[1];
-      const key: string = `${token}-${node.id}`;
+      const keyCache: string = `${node.id};${token}`;
 
-      if (cache.get(key)) {
+      if (cache.get(keyCache)) {
         next();
         return;
       }
@@ -40,7 +40,8 @@ module.exports = (RED: NodeAPI) => {
       try {
         const response = await login(token);
         if (response?.data?.id) {
-          cache.set(key, response.data);
+          // cache for 7 days
+          cache.set(keyCache, response.data, {ttl: 1000 * 60 * 60 * 24 * 7});
         } else {
           res.status(401).json({error: response?.data});
           return;
@@ -62,11 +63,11 @@ module.exports = (RED: NodeAPI) => {
   };
   const unlink = (node: NodeServiceType) => {
     return (req: express.Request, res: express.Response) => {
-      const cache: NanoCache = node.cache;
+      const cache: LRUCache<string, any> = node.cache;
       const token: string | undefined = req.get('Authorization')?.split(' ')[1];
-      const key: string = `${token}-${node.id}`;
+      const keyCache: string = `${node.id};${token}`;
 
-      if (cache.get(key)) cache.del(key);
+      if (cache.get(keyCache)) cache.delete(keyCache);
 
       res.sendStatus(200);
       return;

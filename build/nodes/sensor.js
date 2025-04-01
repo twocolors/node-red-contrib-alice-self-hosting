@@ -29,7 +29,7 @@ module.exports = (RED) => {
         if (!device || !device.init)
             return;
         // init
-        const keyCache = `${self.id}-${ptype}-${instance}`;
+        const keyCache = `${device.service.id};${device.id};${self.id};${ptype};${instance}`;
         let value = device.cache.get(keyCache) || Number(0.0);
         // init
         try {
@@ -102,7 +102,7 @@ module.exports = (RED) => {
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeProperty(ptype, instance);
             if (removed) {
-                device.cache.del(keyCache);
+                device.cache.delete(keyCache);
                 try {
                     yield device.updateInfoDevice();
                 }

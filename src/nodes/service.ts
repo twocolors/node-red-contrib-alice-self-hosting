@@ -1,5 +1,5 @@
 import {NodeAPI} from 'node-red';
-import NanoCache from 'nano-cache';
+import {LRUCache} from 'lru-cache';
 
 module.exports = (RED: NodeAPI) => {
   const credentialsValidator = function (credentials: any) {
@@ -14,11 +14,8 @@ module.exports = (RED: NodeAPI) => {
     }
   };
 
-  // use cache (14 days or 4 MB)
-  const cache: NanoCache = new NanoCache({
-    ttl: 1000 * 60 * 60 * 24 * 14,
-    bytes: 4 * NanoCache.SIZE.MB
-  });
+  // use cache
+  const cache: LRUCache<string, any> = new LRUCache({max: 10_000});
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const webhook = require('../lib/webhook')(RED);

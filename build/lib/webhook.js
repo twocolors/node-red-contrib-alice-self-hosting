@@ -28,9 +28,13 @@ module.exports = (RED) => {
         return (req, res, next) => {
             var _a;
             const [request_id, token] = [req.get('X-Request-Id'), (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1]];
-            if (request_id && token)
-                return next();
-            return res.status(400).json({ error: 'not validate request_id or token' });
+            if (request_id && token) {
+                next();
+            }
+            else {
+                res.status(400).json({ error: 'not validate request_id or token' });
+            }
+            return;
         };
     };
     const authenticationMiddleware = (node) => {
@@ -38,36 +42,45 @@ module.exports = (RED) => {
             var _a, _b;
             const cache = node.cache;
             const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
-            const key = `${token}-${node.id}`;
-            if (cache.get(key)) {
-                return next();
+            const keyCache = `${node.id};${token}`;
+            if (cache.get(keyCache)) {
+                next();
+                return;
             }
             try {
                 const response = yield (0, api_1.login)(token);
                 if ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.id) {
-                    cache.set(key, response.data);
+                    // cache for 7 days
+                    cache.set(keyCache, response.data, { ttl: 1000 * 60 * 60 * 24 * 7 });
                 }
                 else {
-                    return res.status(401).json({ error: response === null || response === void 0 ? void 0 : response.data });
+                    res.status(401).json({ error: response === null || response === void 0 ? void 0 : response.data });
+                    return;
                 }
             }
             catch (error) {
-                return res.status(401).json({ error: error.message });
+                res.status(401).json({ error: error.message });
+                return;
             }
-            return next();
+            next();
+            return;
         });
     };
     // route
-    const pong = (req, res) => res.sendStatus(200);
+    const pong = (req, res) => {
+        res.sendStatus(200);
+        return;
+    };
     const unlink = (node) => {
         return (req, res) => {
             var _a;
             const cache = node.cache;
             const token = (_a = req.get('Authorization')) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
-            const key = `${token}-${node.id}`;
-            if (cache.get(key))
-                cache.del(key);
-            return res.sendStatus(200);
+            const keyCache = `${node.id};${token}`;
+            if (cache.get(keyCache))
+                cache.delete(keyCache);
+            res.sendStatus(200);
+            return;
         };
     };
     const devices = (node) => {
@@ -87,7 +100,8 @@ module.exports = (RED) => {
                     json.payload.devices.push(device.device);
                 }
             });
-            return res.json(json);
+            res.json(json);
+            return;
         };
     };
     const query = (node) => {
@@ -95,8 +109,10 @@ module.exports = (RED) => {
             var _a;
             const request_id = req.get('X-Request-Id');
             const devices = (_a = req.body) === null || _a === void 0 ? void 0 : _a.devices;
-            if (!devices)
-                return res.status(400).json({ error: 'devices is empty' });
+            if (!devices) {
+                res.status(400).json({ error: 'devices is empty' });
+                return;
+            }
             const json = {
                 request_id: request_id,
                 payload: {
@@ -118,7 +134,8 @@ module.exports = (RED) => {
                     });
                 }
             });
-            return res.json(json);
+            res.json(json);
+            return;
         };
     };
     const action = (node) => {
@@ -126,8 +143,10 @@ module.exports = (RED) => {
             var _a, _b;
             const request_id = req.get('X-Request-Id');
             const devices = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.devices;
-            if (!devices)
-                return res.status(400).json({ error: 'devices is empty' });
+            if (!devices) {
+                res.status(400).json({ error: 'devices is empty' });
+                return;
+            }
             const json = {
                 request_id: request_id,
                 payload: {
@@ -181,7 +200,8 @@ module.exports = (RED) => {
                     });
                 }
             });
-            return res.json(json);
+            res.json(json);
+            return;
         };
     };
     const publish = function (self) {

@@ -28,7 +28,7 @@ module.exports = (RED) => {
         if (!device || !device.init)
             return;
         // init
-        const keyCache = `${self.id}-${ctype}-${instance}`;
+        const keyCache = `${device.service.id};${device.id};${self.id};${ctype};${instance}`;
         let value = device.cache.get(keyCache) || Boolean(false);
         // init
         try {
@@ -120,7 +120,7 @@ module.exports = (RED) => {
         self.on('close', (removed, done) => __awaiter(this, void 0, void 0, function* () {
             device.removeCapability(ctype, instance);
             if (removed) {
-                device.cache.del(keyCache);
+                device.cache.delete(keyCache);
                 try {
                     yield device.updateInfoDevice();
                 }

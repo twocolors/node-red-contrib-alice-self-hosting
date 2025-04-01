@@ -23,7 +23,7 @@ module.exports = (RED: NodeAPI) => {
     // device not init
     if (!device || !device.init) return;
     // init
-    const keyCache = `${self.id}-${ctype}-${instance}`;
+    const keyCache = `${device.service.id};${device.id};${self.id};${ctype};${instance}`;
     let value = device.cache.get(keyCache) || Boolean(false);
 
     // init
@@ -150,7 +150,7 @@ module.exports = (RED: NodeAPI) => {
     self.on('close', async (removed: boolean, done: any) => {
       device.removeCapability(ctype, instance);
       if (removed) {
-        device.cache.del(keyCache);
+        device.cache.delete(keyCache);
         try {
           await device.updateInfoDevice();
         } catch (_) {
