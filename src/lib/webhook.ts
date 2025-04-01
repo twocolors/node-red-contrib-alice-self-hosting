@@ -85,12 +85,14 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices');
       RED.nodes.eachNode(n => {
         const device: NodeDeviceType = RED.nodes.getNode(n.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
           json.payload.devices.push(device.device);
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices');
 
       res.json(json);
       return;
@@ -114,6 +116,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices/query');
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -126,6 +129,7 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices/query');
 
       res.json(json);
       return;
@@ -149,6 +153,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices/action');
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -167,8 +172,10 @@ module.exports = (RED: NodeAPI) => {
             };
 
             if (findCapability) {
+              if (node.config.debug) console.time('alice-sh|devices/action/onState');
               // state device
               device.onState(c);
+              if (node.config.debug) console.timeEnd('alice-sh|devices/action/onState');
 
               // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
               if (c.type == 'devices.capabilities.video_stream') {
@@ -197,6 +204,7 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices/action');
 
       res.json(json);
       return;
@@ -235,7 +243,7 @@ module.exports = (RED: NodeAPI) => {
     const jsonParser = bodyParser.json({limit: apiMaxLength});
 
     // debug
-    if (self.config.debug) morganBody(app, {maxBodyLength: 10_000_000});
+    if (self.config.debug) morganBody(app, {maxBodyLength: 1_000_000_000, prettify: false, includeNewLine: true});
     // middleware
     app.use(route.middleware, urlencodedParser, jsonParser, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, urlencodedParser, jsonParser, authenticationMiddleware(self)); // authenticationMiddleware

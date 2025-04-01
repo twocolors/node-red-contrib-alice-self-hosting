@@ -93,6 +93,8 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
+            if (node.config.debug)
+                console.time('alice-sh|devices');
             RED.nodes.eachNode(n => {
                 var _a;
                 const device = RED.nodes.getNode(n.id);
@@ -100,6 +102,8 @@ module.exports = (RED) => {
                     json.payload.devices.push(device.device);
                 }
             });
+            if (node.config.debug)
+                console.timeEnd('alice-sh|devices');
             res.json(json);
             return;
         };
@@ -120,6 +124,8 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
+            if (node.config.debug)
+                console.time('alice-sh|devices/query');
             devices.forEach((d) => {
                 var _a;
                 const device = RED.nodes.getNode(d.id);
@@ -134,6 +140,8 @@ module.exports = (RED) => {
                     });
                 }
             });
+            if (node.config.debug)
+                console.timeEnd('alice-sh|devices/query');
             res.json(json);
             return;
         };
@@ -154,6 +162,8 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
+            if (node.config.debug)
+                console.time('alice-sh|devices/action');
             devices.forEach((d) => {
                 var _a;
                 const device = RED.nodes.getNode(d.id);
@@ -171,8 +181,12 @@ module.exports = (RED) => {
                             }
                         };
                         if (findCapability) {
+                            if (node.config.debug)
+                                console.time('alice-sh|devices/action/onState');
                             // state device
                             device.onState(c);
+                            if (node.config.debug)
+                                console.timeEnd('alice-sh|devices/action/onState');
                             // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
                             if (c.type == 'devices.capabilities.video_stream') {
                                 capability.state.value = findCapability.state.value;
@@ -200,6 +214,8 @@ module.exports = (RED) => {
                     });
                 }
             });
+            if (node.config.debug)
+                console.timeEnd('alice-sh|devices/action');
             res.json(json);
             return;
         };
@@ -232,7 +248,7 @@ module.exports = (RED) => {
         const jsonParser = body_parser_1.default.json({ limit: apiMaxLength });
         // debug
         if (self.config.debug)
-            (0, morgan_body_1.default)(app, { maxBodyLength: 10000000 });
+            (0, morgan_body_1.default)(app, { maxBodyLength: 1000000000, prettify: false, includeNewLine: true });
         // middleware
         app.use(route.middleware, urlencodedParser, jsonParser, validatorMiddleware(self)); // validatorMiddleware
         app.use(route.middleware, urlencodedParser, jsonParser, authenticationMiddleware(self)); // authenticationMiddleware
