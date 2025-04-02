@@ -56,6 +56,11 @@ const Package = require('../../package.json');
 // i know, i fix 5xx from response (Yandex),
 // but make more 5xx for other ...
 axios_1.default.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
+(0, axios_retry_1.default)(axios_1.default, {
+    retries: 3,
+    retryDelay: axios_retry_1.default.exponentialDelay,
+    retryCondition: axios_retry_1.isRetryableError
+});
 const _error = function (error) {
     var _a, _b, _c, _d;
     let text = `${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - ${error.message}`;
@@ -66,11 +71,6 @@ const _error = function (error) {
 };
 const _request = function (options_1) {
     return __awaiter(this, arguments, void 0, function* (options, retries = 5) {
-        (0, axios_retry_1.default)(axios_1.default, {
-            retries: retries,
-            retryDelay: axios_retry_1.default.exponentialDelay,
-            retryCondition: axios_retry_1.isRetryableError
-        });
         try {
             return yield axios_1.default.request(options);
         }
