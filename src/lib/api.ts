@@ -13,7 +13,7 @@ const Package: any = require('../../package.json');
 axios.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 
 axiosRetry(axios, {
-  retries: 3,
+  retries: 5,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: isRetryableError
 });
@@ -26,7 +26,7 @@ const _error = function (error: AxiosError) {
   return text;
 };
 
-const _request = async function (options: any, retries: number = 5) {
+const _request = async function (options: any) {
   try {
     return await axios.request(options);
   } catch (error: any) {
@@ -44,7 +44,7 @@ export const login = function (token: string | undefined) {
     }
   };
 
-  return _request(_options, 3);
+  return _request(_options);
 };
 
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html
