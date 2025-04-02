@@ -12,6 +12,18 @@ const Package: any = require('../../package.json');
 
 axios.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    const retry = isRetryableError(error);
+    if (retry) {
+      console.warn(`[HTTP Retry] Reason: ${error.code || error.message}`);
+    }
+    return retry;
+  }
+});
+
 const _error = function (error: AxiosError) {
   let text = `${error.response?.status} - ${error.message}`;
   if (error.response?.data && typeof error.response?.data === 'object') {
@@ -21,12 +33,6 @@ const _error = function (error: AxiosError) {
 };
 
 const _request = async function (options: any, retries: number = 5) {
-  axiosRetry(axios, {
-    retries: retries,
-    retryDelay: axiosRetry.exponentialDelay,
-    retryCondition: isRetryableError
-  });
-
   try {
     return await axios.request(options);
   } catch (error: any) {
