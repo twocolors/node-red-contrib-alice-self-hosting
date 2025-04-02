@@ -6,8 +6,14 @@ import bodyParser from 'body-parser';
 import {login} from './api';
 import {LRUCache} from 'lru-cache';
 import morganBody from 'morgan-body';
+import {logger, loggerSetup} from '@nrchkb/logger';
+import {performance} from 'node:perf_hooks';
 
 module.exports = (RED: NodeAPI) => {
+  // logger
+  loggerSetup({debugEnabled: true, timestampEnabled: true});
+  const log = logger('alice-sh', 'webhook');
+
   // helper
   const buildPath = function (path: string): string {
     return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
@@ -85,14 +91,15 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
-      if (node.config.debug) console.time('alice-sh|devices');
+      const start = performance.now();
       RED.nodes.eachNode(n => {
         const device: NodeDeviceType = RED.nodes.getNode(n.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
           json.payload.devices.push(device.device);
         }
       });
-      if (node.config.debug) console.timeEnd('alice-sh|devices');
+      const end = performance.now();
+      if (node.config.debug) log.debug(`devices ${end - start}ms`);
 
       res.json(json);
       return;
@@ -116,7 +123,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
-      if (node.config.debug) console.time('alice-sh|devices/query');
+      const start = performance.now();
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -129,7 +136,8 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
-      if (node.config.debug) console.timeEnd('alice-sh|devices/query');
+      const end = performance.now();
+      if (node.config.debug) log.debug(`devices/query ${end - start}ms`);
 
       res.json(json);
       return;
@@ -153,7 +161,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
-      if (node.config.debug) console.time('alice-sh|devices/action');
+      const start_0 = performance.now();
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -172,10 +180,11 @@ module.exports = (RED: NodeAPI) => {
             };
 
             if (findCapability) {
-              if (node.config.debug) console.time('alice-sh|devices/action/onState');
+              const start_1 = performance.now();
               // state device
               device.onState(c);
-              if (node.config.debug) console.timeEnd('alice-sh|devices/action/onState');
+              const end_1 = performance.now();
+              if (node.config.debug) log.debug(`devices/action/onState ${end_1 - start_1}ms`);
 
               // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
               if (c.type == 'devices.capabilities.video_stream') {
@@ -204,7 +213,8 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
-      if (node.config.debug) console.timeEnd('alice-sh|devices/action');
+      const end_0 = performance.now();
+      if (node.config.debug) log.debug(`devices/action ${end_0 - start_0}ms`);
 
       res.json(json);
       return;

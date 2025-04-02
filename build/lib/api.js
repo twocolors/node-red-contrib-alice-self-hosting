@@ -57,7 +57,7 @@ const Package = require('../../package.json');
 // but make more 5xx for other ...
 axios_1.default.defaults.headers.common['User-Agent'] = `${Package.name.trim()}/${Package.version.trim()} Node-RED`;
 (0, axios_retry_1.default)(axios_1.default, {
-    retries: 3,
+    retries: 5,
     retryDelay: axios_retry_1.default.exponentialDelay,
     retryCondition: axios_retry_1.isRetryableError
 });
@@ -69,8 +69,8 @@ const _error = function (error) {
     }
     return text;
 };
-const _request = function (options_1) {
-    return __awaiter(this, arguments, void 0, function* (options, retries = 5) {
+const _request = function (options) {
+    return __awaiter(this, void 0, void 0, function* () {
         try {
             return yield axios_1.default.request(options);
         }
@@ -88,7 +88,7 @@ const login = function (token) {
             Authorization: `OAuth ${token}`
         }
     };
-    return _request(_options, 3);
+    return _request(_options);
 };
 exports.login = login;
 // https://yandex.ru/dev/dialogs/smart-home/doc/reference-alerts/post-skill_id-callback-state.html

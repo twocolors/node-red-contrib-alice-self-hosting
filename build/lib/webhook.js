@@ -17,7 +17,12 @@ const node_http_1 = __importDefault(require("node:http"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const api_1 = require("./api");
 const morgan_body_1 = __importDefault(require("morgan-body"));
+const logger_1 = require("@nrchkb/logger");
+const node_perf_hooks_1 = require("node:perf_hooks");
 module.exports = (RED) => {
+    // logger
+    (0, logger_1.loggerSetup)({ debugEnabled: true, timestampEnabled: true });
+    const log = (0, logger_1.logger)('alice-sh', 'webhook');
     // helper
     const buildPath = function (path) {
         return `/${path.replace(/^\/|\/$/g, '')}/webhook`;
@@ -93,8 +98,7 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
-            if (node.config.debug)
-                console.time('alice-sh|devices');
+            const start = node_perf_hooks_1.performance.now();
             RED.nodes.eachNode(n => {
                 var _a;
                 const device = RED.nodes.getNode(n.id);
@@ -102,8 +106,9 @@ module.exports = (RED) => {
                     json.payload.devices.push(device.device);
                 }
             });
+            const end = node_perf_hooks_1.performance.now();
             if (node.config.debug)
-                console.timeEnd('alice-sh|devices');
+                log.debug(`devices ${end - start}ms`);
             res.json(json);
             return;
         };
@@ -124,8 +129,7 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
-            if (node.config.debug)
-                console.time('alice-sh|devices/query');
+            const start = node_perf_hooks_1.performance.now();
             devices.forEach((d) => {
                 var _a;
                 const device = RED.nodes.getNode(d.id);
@@ -140,8 +144,9 @@ module.exports = (RED) => {
                     });
                 }
             });
+            const end = node_perf_hooks_1.performance.now();
             if (node.config.debug)
-                console.timeEnd('alice-sh|devices/query');
+                log.debug(`devices/query ${end - start}ms`);
             res.json(json);
             return;
         };
@@ -162,8 +167,7 @@ module.exports = (RED) => {
                     devices: []
                 }
             };
-            if (node.config.debug)
-                console.time('alice-sh|devices/action');
+            const start_0 = node_perf_hooks_1.performance.now();
             devices.forEach((d) => {
                 var _a;
                 const device = RED.nodes.getNode(d.id);
@@ -181,12 +185,12 @@ module.exports = (RED) => {
                             }
                         };
                         if (findCapability) {
-                            if (node.config.debug)
-                                console.time('alice-sh|devices/action/onState');
+                            const start_1 = node_perf_hooks_1.performance.now();
                             // state device
                             device.onState(c);
+                            const end_1 = node_perf_hooks_1.performance.now();
                             if (node.config.debug)
-                                console.timeEnd('alice-sh|devices/action/onState');
+                                log.debug(`devices/action/onState ${end_1 - start_1}ms`);
                             // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
                             if (c.type == 'devices.capabilities.video_stream') {
                                 capability.state.value = findCapability.state.value;
@@ -214,8 +218,9 @@ module.exports = (RED) => {
                     });
                 }
             });
+            const end_0 = node_perf_hooks_1.performance.now();
             if (node.config.debug)
-                console.timeEnd('alice-sh|devices/action');
+                log.debug(`devices/action ${end_0 - start_0}ms`);
             res.json(json);
             return;
         };
