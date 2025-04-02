@@ -1,9 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const nano_cache_1 = __importDefault(require("nano-cache"));
+const lru_cache_1 = require("lru-cache");
 module.exports = (RED) => {
     const credentialsValidator = function (credentials) {
         if (!(credentials === null || credentials === void 0 ? void 0 : credentials.skill_id)) {
@@ -16,11 +13,8 @@ module.exports = (RED) => {
             throw new Error('Parameter `Path` is required');
         }
     };
-    // use cache (14 days or 4 MB)
-    const cache = new nano_cache_1.default({
-        ttl: 1000 * 60 * 60 * 24 * 14,
-        bytes: 4 * nano_cache_1.default.SIZE.MB
-    });
+    // use cache
+    const cache = new lru_cache_1.LRUCache({ max: 10000 });
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const webhook = require('../lib/webhook')(RED);
     RED.nodes.registerType('alice-sh-service', function (config) {

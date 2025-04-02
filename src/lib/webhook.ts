@@ -4,7 +4,7 @@ import express from 'express';
 import http from 'node:http';
 import bodyParser from 'body-parser';
 import {login} from './api';
-import NanoCache from 'nano-cache';
+import {LRUCache} from 'lru-cache';
 import morganBody from 'morgan-body';
 
 module.exports = (RED: NodeAPI) => {
@@ -18,46 +18,59 @@ module.exports = (RED: NodeAPI) => {
   const validatorMiddleware = (node: NodeServiceType) => {
     return (req: express.Request, res: express.Response, next: express.NextFunction) => {
       const [request_id, token] = [req.get('X-Request-Id'), req.get('Authorization')?.split(' ')[1]];
-      if (request_id && token) return next();
-      return res.status(400).json({error: 'not validate request_id or token'});
+      if (request_id && token) {
+        next();
+      } else {
+        res.status(400).json({error: 'not validate request_id or token'});
+      }
+      return;
     };
   };
   const authenticationMiddleware = (node: NodeServiceType) => {
     return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      const cache: NanoCache = node.cache;
+      const cache: LRUCache<string, any> = node.cache;
       const token: string | undefined = req.get('Authorization')?.split(' ')[1];
-      const key: string = `${token}-${node.id}`;
+      const keyCache: string = `${node.id};${token}`;
 
-      if (cache.get(key)) {
-        return next();
+      if (cache.get(keyCache)) {
+        next();
+        return;
       }
 
       try {
         const response = await login(token);
         if (response?.data?.id) {
-          cache.set(key, response.data);
+          // cache for 7 days
+          cache.set(keyCache, response.data, {ttl: 1000 * 60 * 60 * 24 * 7});
         } else {
-          return res.status(401).json({error: response?.data});
+          res.status(401).json({error: response?.data});
+          return;
         }
       } catch (error: any) {
-        return res.status(401).json({error: error.message});
+        res.status(401).json({error: error.message});
+        return;
       }
 
-      return next();
+      next();
+      return;
     };
   };
 
   // route
-  const pong = (req: express.Request, res: express.Response) => res.sendStatus(200);
+  const pong = (req: express.Request, res: express.Response) => {
+    res.sendStatus(200);
+    return;
+  };
   const unlink = (node: NodeServiceType) => {
     return (req: express.Request, res: express.Response) => {
-      const cache: NanoCache = node.cache;
+      const cache: LRUCache<string, any> = node.cache;
       const token: string | undefined = req.get('Authorization')?.split(' ')[1];
-      const key: string = `${token}-${node.id}`;
+      const keyCache: string = `${node.id};${token}`;
 
-      if (cache.get(key)) cache.del(key);
+      if (cache.get(keyCache)) cache.delete(keyCache);
 
-      return res.sendStatus(200);
+      res.sendStatus(200);
+      return;
     };
   };
   const devices = (node: NodeServiceType) => {
@@ -72,14 +85,17 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices');
       RED.nodes.eachNode(n => {
         const device: NodeDeviceType = RED.nodes.getNode(n.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
           json.payload.devices.push(device.device);
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices');
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
   const query = (node: NodeServiceType) => {
@@ -87,7 +103,10 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.devices;
 
-      if (!devices) return res.status(400).json({error: 'devices is empty'});
+      if (!devices) {
+        res.status(400).json({error: 'devices is empty'});
+        return;
+      }
 
       const json: any = {
         request_id: request_id,
@@ -97,6 +116,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices/query');
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -109,8 +129,10 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices/query');
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
   const action = (node: NodeServiceType) => {
@@ -118,7 +140,10 @@ module.exports = (RED: NodeAPI) => {
       const request_id: string | undefined = req.get('X-Request-Id');
       const devices: any = req.body?.payload?.devices;
 
-      if (!devices) return res.status(400).json({error: 'devices is empty'});
+      if (!devices) {
+        res.status(400).json({error: 'devices is empty'});
+        return;
+      }
 
       const json: any = {
         request_id: request_id,
@@ -128,6 +153,7 @@ module.exports = (RED: NodeAPI) => {
         }
       };
 
+      if (node.config.debug) console.time('alice-sh|devices/action');
       devices.forEach((d: any) => {
         const device: NodeDeviceType = RED.nodes.getNode(d.id) as NodeDeviceType;
         if (device?.device && device?.config?.service == node.id) {
@@ -146,8 +172,10 @@ module.exports = (RED: NodeAPI) => {
             };
 
             if (findCapability) {
+              if (node.config.debug) console.time('alice-sh|devices/action/onState');
               // state device
               device.onState(c);
+              if (node.config.debug) console.timeEnd('alice-sh|devices/action/onState');
 
               // https://yandex.ru/dev/dialogs/smart-home/doc/concepts/video_stream.html?lang=en
               if (c.type == 'devices.capabilities.video_stream') {
@@ -176,8 +204,10 @@ module.exports = (RED: NodeAPI) => {
           });
         }
       });
+      if (node.config.debug) console.timeEnd('alice-sh|devices/action');
 
-      return res.json(json);
+      res.json(json);
+      return;
     };
   };
 
@@ -213,7 +243,7 @@ module.exports = (RED: NodeAPI) => {
     const jsonParser = bodyParser.json({limit: apiMaxLength});
 
     // debug
-    if (self.config.debug) morganBody(app, {maxBodyLength: 10_000_000});
+    if (self.config.debug) morganBody(app, {maxBodyLength: 1_000_000_000, prettify: false, includeNewLine: true});
     // middleware
     app.use(route.middleware, urlencodedParser, jsonParser, validatorMiddleware(self)); // validatorMiddleware
     app.use(route.middleware, urlencodedParser, jsonParser, authenticationMiddleware(self)); // authenticationMiddleware

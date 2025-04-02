@@ -37,9 +37,9 @@
   "dependencies": {
     "axios": "1.8.4",
     "axios-retry": "4.5.0",
-    "nano-cache": "1.1.2",
+    "body-parser": "2.2.0",
     "express": "4.21.2",
-    "body-parser": "1.20.3",
+    "lru-cache": "^11.1.0",
     "morgan-body": "2.6.9"
   },
   "devDependencies": {
@@ -47,7 +47,6 @@
     "@types/node-red": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.2.0",
-    "@types/nano-cache": "^1.1.4",
     "eslint": "9.23.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-node": "^11.1.0",
@@ -66,7 +65,7 @@
     "self",
     "hosting"
   ],
-  "files" :[
+  "files": [
     "LICENSE",
     "build",
     "examples"

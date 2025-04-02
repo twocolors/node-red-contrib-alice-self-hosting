@@ -1,10 +1,10 @@
 import {Node} from 'node-red';
-import NanoCache from 'nano-cache';
+import {LRUCache} from 'lru-cache';
 import {Express} from 'express';
 import {Server} from 'node:http';
 
 export type NodeServiceType = Node & {
-  cache: NanoCache;
+  cache: LRUCache<string, any>;
   app: Express;
   config: {
     debug: boolean;
@@ -16,7 +16,7 @@ export type NodeServiceType = Node & {
 
 export type NodeDeviceType = Node & {
   config: any;
-  cache: NanoCache;
+  cache: LRUCache<string, any>;
   device: any;
   onState: (c: any) => void;
   findCapability: (type: string, instance: any) => any;
@@ -30,4 +30,5 @@ export type NodeDeviceType = Node & {
   updateInfoDevice: () => Promise<void>;
   on(event: 'onState', object: any): void;
   init: boolean;
+  service: NodeServiceType;
 };
