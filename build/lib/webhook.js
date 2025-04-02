@@ -21,7 +21,6 @@ const logger_1 = require("@nrchkb/logger");
 const node_perf_hooks_1 = require("node:perf_hooks");
 module.exports = (RED) => {
     // logger
-    (0, logger_1.loggerSetup)({ debugEnabled: true, timestampEnabled: true });
     const log = (0, logger_1.logger)('alice-sh', 'webhook');
     // helper
     const buildPath = function (path) {

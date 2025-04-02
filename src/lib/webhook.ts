@@ -6,12 +6,11 @@ import bodyParser from 'body-parser';
 import {login} from './api';
 import {LRUCache} from 'lru-cache';
 import morganBody from 'morgan-body';
-import {logger, loggerSetup} from '@nrchkb/logger';
+import {logger} from '@nrchkb/logger';
 import {performance} from 'node:perf_hooks';
 
 module.exports = (RED: NodeAPI) => {
   // logger
-  loggerSetup({debugEnabled: true, timestampEnabled: true});
   const log = logger('alice-sh', 'webhook');
 
   // helper
