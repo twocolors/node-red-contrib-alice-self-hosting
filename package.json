@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@nrchkb/logger": "^3.1.1",
-    "axios": "1.11.0",
+    "axios": "1.12.2",
     "axios-retry": "4.5.0",
     "body-parser": "2.2.0",
     "express": "4.21.2",
