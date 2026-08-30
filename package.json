@@ -20,7 +20,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "node-red": {
-    "version": ">=2.2.0",
+    "version": ">=4.0.0",
     "nodes": {
       "service": "build/nodes/service.js",
       "device": "build/nodes/device.js",
@@ -44,8 +44,8 @@
     "morgan-body": "2.6.9"
   },
   "devDependencies": {
-    "@types/node": "25.9.5",
-    "@types/node-red": "^1.2.1",
+    "@types/node": "26.1.0",
+    "@types/node-red": "^1.3.5",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
     "eslint": "8.56.0",
@@ -56,7 +56,7 @@
     "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18.5"
   },
   "keywords": [
     "node-red",
