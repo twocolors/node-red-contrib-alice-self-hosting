@@ -44,7 +44,7 @@
     "morgan-body": "2.6.9"
   },
   "devDependencies": {
-    "@types/node": "^25.2.0",
+    "@types/node": "^26.4.0",
     "@types/node-red": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.2.0",
